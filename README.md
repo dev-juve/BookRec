@@ -12,4 +12,4 @@ This project is a lightweight, fully responsive web application built using **.N
 ## Getting Started
 1. Clone the repository:
    ```bash
-   git clone https://github.com/dev-juve/BookRecWeb.git
+   git clone https://github.com/dev-juve/BookRec.git
