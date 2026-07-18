@@ -1,7 +1,59 @@
 ﻿@page "/"
+@using BookRec.Models
+@using BookRec.Services
+@inject BookService BookService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>BookRecs - Smart Recommendations</PageTitle>
 
-<h1>Hello, world!</h1>
+<!-- Hero Section responsive spacing -->
+<div class="p-5 mb-4 bg-light rounded-3 text-center text-md-start">
+    <div class="container-fluid py-3">
+        <h1 class="display-5 fw-bold text-primary">Find Your Next Great Read</h1>
+        <p class="col-md-8 fs-4 text-muted">Discover curated book recommendations on Programming, AI, Personal Growth, and Finance. Built for developers, by developers.</p>
+        <button class="btn btn-primary btn-lg" type="button">Get Started Free</button>
+    </div>
+</div>
 
-Welcome to your new app.
+<div class="container my-4">
+    <div class="row">
+        <!-- Sidebar Navigation filters: Collapses elegantly on tablet/mobile views -->
+        <div class="col-12 col-md-3 mb-4">
+            <h4 class="fw-bold">Categories</h4>
+            <div class="list-group">
+                <button class="list-group-item list-group-item-action active">All Categories</button>
+                @foreach (var cat in Enum.GetValues<BookCategory>())
+                {
+                    <button class="list-group-item list-group-item-action">@cat.ToString()</button>
+                }
+            </div>
+        </div>
+
+        <!-- Dynamic Main Cards Grid Layout -->
+        <div class="col-12 col-md-9">
+            <h3 class="mb-3 fw-bold">Featured Recommendations</h3>
+            <div class="row">
+                @foreach (var book in BookService.GetAllBooks())
+                {
+                    <!-- Adaptive column widths: 1 card wide on mobile, 2 on tablet, 3 on desktop standard -->
+                    <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="@book.CoverImageUrl" class="card-img-top p-2" alt="Book Cover" style="max-height: 200px; object-fit: contain;">
+                            <div class="card-body d-flex flex-column">
+                                <span class="badge bg-secondary align-self-start mb-2">@book.Category</span>
+                                <h5 class="card-title fw-bold m-0">@book.Title</h5>
+                                <small class="text-muted mb-2">By @book.Author</small>
+                                <p class="card-text text-truncate-3 fs-7 text-secondary flex-grow-1">@book.Description</p>
+                                
+                                <div class="mt-3 d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-sm" @onclick="() => BookService.AddToToReadList(book)">
+                                        + Add to To-Read
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

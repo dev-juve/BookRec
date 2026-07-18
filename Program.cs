@@ -1,10 +1,12 @@
-using BookRecWeb.Components;
+using BookRec.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddSingleton<BookRec.Services.BookService>();
 
 var app = builder.Build();
 
