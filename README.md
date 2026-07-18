@@ -8,6 +8,10 @@ This project is a lightweight, fully responsive web application built using **.N
 - **User Interactions**: Authenticate to manage a personalized "To-Read" list (Create, Read, Update, Delete) and submit recommendations.
 - **Community Feedback**: Leave reviews and star ratings on listed books.
 
+## Group Members
+Juvenson Elizaire
+Cris Altman
+
 
 ## Getting Started
 1. Clone the repository:
