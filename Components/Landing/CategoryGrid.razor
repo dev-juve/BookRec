@@ -1,0 +1,80 @@
+@using BookRec.Models
+
+<section id="categories" class="category-section py-4 my-3">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark m-0">Explore by Category</h3>
+                <small class="text-muted">Select a topic to filter recommendations</small>
+            </div>
+            @if (SelectedCategory.HasValue)
+            {
+                <button class="btn btn-sm btn-outline-secondary" @onclick="ClearCategory">
+                    Show All
+                </button>
+            }
+        </div>
+
+        <div class="row g-3">
+            @foreach (var category in Enum.GetValues<BookCategory>())
+            {
+                var isSelected = SelectedCategory == category;
+                <div class="col-6 col-md-4 col-lg-2-4">
+                    <div class="card card-category h-100 border-0 text-center p-3 rounded-4 shadow-sm cursor-pointer @(isSelected ? "bg-primary text-white" : "bg-white text-dark")"
+                         @onclick="() => SelectCategory(category)">
+                        <div class="category-icon fs-2 mb-2 @(isSelected ? "text-white" : "text-primary")">
+                            <i class="bi @GetCategoryIcon(category)"></i>
+                        </div>
+                        <h6 class="fw-bold m-0 fs-6">@GetCategoryDisplayName(category)</h6>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter] public BookCategory? SelectedCategory { get; set; }
+    [Parameter] public EventCallback<BookCategory?> OnCategorySelected { get; set; }
+
+    private async Task SelectCategory(BookCategory category)
+    {
+        if (SelectedCategory == category)
+            await OnCategorySelected.InvokeAsync(null);
+        else
+            await OnCategorySelected.InvokeAsync(category);
+    }
+
+    private async Task ClearCategory()
+    {
+        await OnCategorySelected.InvokeAsync(null);
+    }
+
+    private string GetCategoryDisplayName(BookCategory category) => category switch
+    {
+        BookCategory.SelfDevelopment => "Self-Development",
+        BookCategory.Programming => "Programming",
+        BookCategory.AI => "Artificial Intelligence",
+        BookCategory.Novel => "Novels",
+        BookCategory.Finance => "Finance",
+        _ => category.ToString()
+    };
+
+    private string GetCategoryIcon(BookCategory category) => category switch
+    {
+        BookCategory.SelfDevelopment => "bi-person-badge",
+        BookCategory.Programming => "bi-code-slash",
+        BookCategory.AI => "bi-cpu",
+        BookCategory.Novel => "bi-book",
+        BookCategory.Finance => "bi-cash-coin",
+        _ => "bi-journal"
+    };
+}
+
+<style>
+    .cursor-pointer { cursor: pointer; transition: transform 0.2s ease, shadow 0.2s ease; }
+    .cursor-pointer:hover { transform: translateY(-3px); }
+    @@media (min-width: 992px) {
+        .col-lg-2-4 { flex: 0 0 auto; width: 20%; }
+    }
+</style>

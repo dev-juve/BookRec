@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap');
+
+:root {
+    /* colors */
+    --folio-black: #1E1E1E;
+    --folio-terracotta: #B35A42;
+    --folio-terracotta-hover: #9b4b35;
+    --folio-slate: #5E5954;
+    --folio-sand: #E3DDD3;
+    --folio-cream: #FAF8F5;
+    --folio-white: #FFFFFF;
+
+    /* fonts */
+    --font-serif: 'Newsreader', Georgia, serif;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background-color: var(--folio-cream);
+    color: var(--folio-black);
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* headings */
+h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-serif);
+    color: var(--folio-black);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+}
+
+/* eyebrow style */
+.eyebrow-tag {
+    font-family: var(--font-sans);
+    color: var(--folio-terracotta);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+/* custom buttons */
+.btn-terracotta {
+    background-color: var(--folio-terracotta);
+    color: var(--folio-white);
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.65rem 1.4rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-terracotta:hover {
+    background-color: var(--folio-terracotta-hover);
+    color: var(--folio-white);
+}
+
+.btn-outline-sand {
+    background-color: transparent;
+    color: var(--folio-black);
+    border: 1px solid var(--folio-black);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.65rem 1.4rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-outline-sand:hover {
+    background-color: var(--folio-sand);
+    color: var(--folio-black);
+}
+
+.btn-dark-solid {
+    background-color: var(--folio-black);
+    color: var(--folio-white);
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.btn-dark-solid:hover {
+    background-color: #333333;
+    color: var(--folio-white);
+}
+
+/* custom cards */
+.folio-card {
+    background-color: var(--folio-cream);
+    border: 1px solid var(--folio-sand);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.folio-card:hover {
+    border-color: var(--folio-terracotta);
+}
+
+
+.folio-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
