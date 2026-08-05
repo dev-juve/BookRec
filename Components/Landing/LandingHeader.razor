@@ -1,3 +1,5 @@
+@using Microsoft.AspNetCore.Components.Authorization
+
 <header class="bg-white border-bottom py-3 px-4 sticky-top">
     <div class="container-fluid d-flex align-items-center justify-content-between max-w-1200">
         <!-- logo -->
@@ -14,9 +16,21 @@
         </div>
 
         <!-- login/singup -->
-        <div class="d-flex align-items-center gap-3">
-            <a href="/signin" class="text-decoration-none text-dark fw-medium small">Sign In</a>
-            <a href="/signup" class="btn-dark-solid">Sign Up</a>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="d-flex align-items-center gap-3">
+                    Welcome @context.User.Identity?.Name! •
+                    <a href="/signout" class="text-decoration-none text-dark fw-medium small">Sign Out</a>
+                </div>
+            </Authorized>
+
+            <NotAuthorized>
+                <div class="d-flex align-items-center gap-3">
+                    @* <a href="/signin" class="text-decoration-none text-dark fw-medium small">Sign In with GitHub</a> *@
+                    <a href="/signin" class="btn-dark-solid">Sign In with GitHub</a>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+
     </div>
 </header>
