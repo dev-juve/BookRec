@@ -18,21 +18,15 @@
             @foreach (var book in DisplayBooks)
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="folio-card h-100 d-flex flex-column justify-content-between p-3 bg-white position-relative">
-                        @if (book.IsBestseller)
-                        {
-                            <span class="position-absolute top-0 end-0 m-3 px-2 py-1 rounded small fw-bold" 
-                                  style="background-color: rgba(179, 90, 66, 0.1); color: var(--folio-terracotta); font-size: 0.75rem;">
-                                ⭐ Bestseller
-                            </span>
-                        }
+                    <div class="folio-card h-100 d-flex flex-column justify-content-between p-3 bg-white">
                         
                         <div>
-                            <div class="bg-light rounded p-3 text-center mb-3 d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <img src="@book.CoverImageUrl" class="img-fluid rounded shadow-sm" alt="@book.Title" style="max-height: 170px; object-fit: contain;" />
+                            <div class="book-cover-wrapper rounded p-3 text-center mb-3 d-flex align-items-center justify-content-center">
+                                <img src="@book.CoverImageUrl" 
+                                     class="book-cover-img rounded" 
+                                     alt="@book.Title" />
                             </div>
 
-                        
                             <span class="eyebrow-tag m-0 mb-1" style="font-size: 0.68rem;">@book.Category</span>
                             <h6 class="font-serif fw-bold text-dark mb-1 text-truncate" title="@book.Title">@book.Title</h6>
                             <small class="d-block mb-2" style="color: var(--folio-slate);">by @book.Author</small>
@@ -41,7 +35,6 @@
                             </p>
                         </div>
 
-                        <!-- cta -->
                         <div class="mt-3 pt-3 border-top d-grid" style="border-color: var(--folio-sand) !important;">
                             <button class="btn-outline-sand btn-sm text-center py-2 d-flex align-items-center justify-content-center gap-1" 
                                     @onclick="() => BookService.AddToToReadList(book)">
@@ -57,9 +50,34 @@
 
 @code {
     [Parameter] public List<Book> DisplayBooks { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        StateHasChanged();
+    }
 }
 
 <style>
+    .book-cover-wrapper {
+        background: linear-gradient(145deg, #f3efe6, #faf8f5);
+        height: 220px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+    }
+
+    .book-cover-img {
+        max-height: 180px;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .folio-card:hover .book-cover-img {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+    }
+
     .text-truncate-3 {
         display: -webkit-box;
         -webkit-line-clamp: 3;

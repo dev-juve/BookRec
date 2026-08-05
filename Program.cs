@@ -1,4 +1,7 @@
 using BookRec.Components;
+using DotNetEnv;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHttpClient<BookRec.Services.GoogleBooksApiService>();
 builder.Services.AddSingleton<BookRec.Services.BookService>();
 
 var app = builder.Build();
