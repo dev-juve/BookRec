@@ -3,44 +3,53 @@
 @using BookRec.Services
 @using BookRec.Components.Landing
 @inject BookService BookService
+@inject GoogleBooksApiService ApiService
 
 <PageTitle>BookRec • Reimagining Book Discovery</PageTitle>
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
 <div class="folio-landing-wrapper">
-    <!-- 1. Header -->
     <LandingHeader />
 
-    <!-- 2. Hero Section -->
     <HeroSection />
 
-    <!-- 3. Folio Creed Banner -->
     <CreedBanner />
 
-    <!-- 4. Curated Subjects -->
-    <SubjectGrid />
+    <SubjectGrid OnSubjectSelected="HandleSubjectSelected" SelectedCategory="@currentSubject" />
 
-    <!-- 5. Newly Released Books Grid -->
     <NewReleasesCarousel DisplayBooks="recentBooks" />
 
-    <!-- 6. The Flow / How It Works -->
     <FlowSection />
 
-    <!-- 7. Testimonials -->
     <TestimonialsSection />
 
-    <!-- 8. CTA Footer Banner -->
     <CtaBanner />
 </div>
 
 @code {
-    // 1. Declare the list field here so Razor knows it exists
     private List<Book> recentBooks = new();
+    private string currentSubject = "subject:computers";
 
-    // 2. Populate the list on page load from the BookService
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         recentBooks = BookService.GetAllBooks();
+        await LoadBooksForCategory(currentSubject);
+    }
+
+    private async Task HandleSubjectSelected(string categoryQuery)
+    {
+        currentSubject = categoryQuery;
+        await LoadBooksForCategory(categoryQuery);
+    }
+
+    private async Task LoadBooksForCategory(string categoryQuery)
+    {
+        var apiBooks = await ApiService.SearchBooksAsync(categoryQuery);
+        if (apiBooks != null && apiBooks.Any())
+        {
+            recentBooks = apiBooks.ToList();
+            StateHasChanged();
+        }
     }
 }

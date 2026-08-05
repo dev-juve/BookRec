@@ -1,74 +1,92 @@
-<section id="subjects" class="folio-section">
+@using BookRec.Models
+
+<section id="subjects" class="folio-section py-5">
     <div class="container">
-        <span class="eyebrow-tag">CURATED STREAMS</span>
-        <h2 class="display-5 font-serif mb-5">Explore by Subject</h2>
+        <div class="mb-4">
+            <span class="eyebrow-tag">CURATED STREAMS</span>
+            <h2 class="display-5 font-serif m-0">Explore by Subject</h2>
+        </div>
 
-        <div class="row g-3">
-            <!-- self-dev -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2-4">
-                <div class="folio-card h-100 text-start">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" 
-                         style="width: 40px; height: 40px; background-color: rgba(179, 90, 66, 0.1); color: var(--folio-terracotta);">
-                        <i class="bi bi-person"></i>
-                    </div>
-                    <h5 class="fw-bold mb-1 fs-6">Self-Development</h5>
-                    <small style="color: var(--folio-slate);">124 recommendations</small>
-                </div>
-            </div>
+        <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5">
+            @foreach (var subject in Subjects)
+            {
+                var isSelected = SelectedCategory == subject.QueryValue;
+                
+                <div class="col">
+                    <div class="subject-card h-100 p-3 rounded-3 @(isSelected ? "selected" : "")"
+                         @onclick="() => SelectSubject(subject.QueryValue)">
+                        
+                        <div class="icon-circle mb-3 d-flex align-items-center justify-content-center">
+                            <i class="@subject.IconClass fs-5"></i>
+                        </div>
 
-            <!-- programming -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2-4">
-                <div class="folio-card h-100 text-start">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" 
-                         style="width: 40px; height: 40px; background-color: rgba(179, 90, 66, 0.1); color: var(--folio-terracotta);">
-                        <i class="bi bi-code-slash"></i>
+                        <h6 class="fw-bold text-dark mb-1">@subject.Name</h6>
+                        <small class="text-muted fs-7">@subject.RecommendationCount recommendations</small>
                     </div>
-                    <h5 class="fw-bold mb-1 fs-6">Programming</h5>
-                    <small style="color: var(--folio-slate);">89 recommendations</small>
                 </div>
-            </div>
-
-            <!-- AI -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2-4">
-                <div class="folio-card h-100 text-start">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" 
-                         style="width: 40px; height: 40px; background-color: rgba(179, 90, 66, 0.1); color: var(--folio-terracotta);">
-                        <i class="bi bi-cpu"></i>
-                    </div>
-                    <h5 class="fw-bold mb-1 fs-6">AI & Future</h5>
-                    <small style="color: var(--folio-slate);">64 recommendations</small>
-                </div>
-            </div>
-
-            <!-- novel -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2-4">
-                <div class="folio-card h-100 text-start">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" 
-                         style="width: 40px; height: 40px; background-color: rgba(179, 90, 66, 0.1); color: var(--folio-terracotta);">
-                        <i class="bi bi-book"></i>
-                    </div>
-                    <h5 class="fw-bold mb-1 fs-6">Novel & Fiction</h5>
-                    <small style="color: var(--folio-slate);">142 recommendations</small>
-                </div>
-            </div>
-
-            <!-- finance -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2-4">
-                <div class="folio-card h-100 text-start">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" 
-                         style="width: 40px; height: 40px; background-color: rgba(179, 90, 66, 0.1); color: var(--folio-terracotta);">
-                        <i class="bi bi-currency-dollar"></i>
-                    </div>
-                    <h5 class="fw-bold mb-1 fs-6">Finance & Markets</h5>
-                    <small style="color: var(--folio-slate);">78 recommendations</small>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
 
+@code {
+    [Parameter] public EventCallback<string> OnSubjectSelected { get; set; }
+    [Parameter] public string SelectedCategory { get; set; } = "subject:computers";
+
+    private List<SubjectItem> Subjects = new()
+    {
+        new("Self-Development", "subject:self-help", "bi bi-compass-fill", 124),
+        new("Programming", "subject:computers", "bi bi-code-slash", 89),
+        new("AI & Future", "subject:\"artificial intelligence\"", "bi bi-cpu-fill", 64),
+        new("Novel & Fiction", "subject:fiction", "bi bi-book-half", 142),
+        new("Finance & Markets", "subject:business", "bi bi-graph-up-arrow", 78)
+    };
+
+    private async Task SelectSubject(string query)
+    {
+        SelectedCategory = query;
+        if (OnSubjectSelected.HasDelegate)
+        {
+            await OnSubjectSelected.InvokeAsync(query);
+        }
+    }
+
+    public record SubjectItem(string Name, string QueryValue, string IconClass, int RecommendationCount);
+}
+
 <style>
-    @@media (min-width: 992px) {
-        .col-lg-2-4 { flex: 0 0 auto; width: 20%; }
+    .subject-card {
+        background-color: #faf8f5;
+        border: 1px solid var(--folio-sand, #e8e2d5);
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .subject-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--folio-terracotta, #b35a42);
+        box-shadow: 0 8px 18px rgba(179, 90, 66, 0.08);
+    }
+
+    .subject-card.selected {
+        background-color: #fff;
+        border-color: var(--folio-terracotta, #b35a42);
+        border-width: 2px;
+        box-shadow: 0 4px 12px rgba(179, 90, 66, 0.12);
+    }
+
+    .icon-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: rgba(179, 90, 66, 0.08);
+        color: var(--folio-terracotta, #b35a42);
+        transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .subject-card:hover .icon-circle,
+    .subject-card.selected .icon-circle {
+        background-color: var(--folio-terracotta, #b35a42);
+        color: #fff;
     }
 </style>
