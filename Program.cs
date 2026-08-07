@@ -2,10 +2,18 @@ using BookRec.Components;
 using AspNet.Security.OAuth.GitHub;
 using Microsoft.AspNetCore.Authentication;
 using DotNetEnv;
+using BookRec.Data;
+using Microsoft.EntityFrameworkCore;
 
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<BookRecContext>(options => 
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString(
+            "BookRecContext"
+        )));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
