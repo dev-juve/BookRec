@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using BookRec.Data;
 using BookRec.Models;
+using BookRec.Services;
 using Microsoft.AspNetCore.Authentication;
 using DotNetEnv;
 
@@ -14,8 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient<BookRec.Services.GoogleBooksApiService>();
-builder.Services.AddSingleton<BookRec.Services.BookService>();
+builder.Services.AddHttpClient<GoogleBooksApiService>();
+builder.Services.AddSingleton<BookService>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserService>();
 
 // retrieve github OAuth credentials from .env
 var githubClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID") 

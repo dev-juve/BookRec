@@ -1,0 +1,20 @@
+@page "/dashboard"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using BookRec.Services
+@inject UserService userService
+
+    <AuthorizeView>
+        <Authorized>
+            <div class="d-flex align-items-center gap-3">
+                <h1>UserProfile</h1>
+                <span class="fw-semibold small"><h2>@userService.Name</h2></span>
+            </div>
+        </Authorized>
+
+        <NotAuthorized>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/signin" class="btn-dark-solid">Sign In with GitHub</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
