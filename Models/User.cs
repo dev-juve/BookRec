@@ -18,7 +18,6 @@ public class User
 
     public DateTime LastLoginAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation Properties
     public List<UserBook> SavedBooks { get; set; } = new();
     public List<BookReview> Reviews { get; set; } = new();
     public List<SearchHistory> SearchHistories { get; set; } = new();

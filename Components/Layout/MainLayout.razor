@@ -1,18 +1,21 @@
 ﻿@inherits LayoutComponentBase
+@using BookRec.Components.Layout
 
-<div class="page">
-    <div class="sidebar">
-    </div>
+<div class="d-flex flex-column min-vh-100 bg-white">
+    <AppHeader />
 
-    <main>
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="flex-grow-1">
+        @Body
     </main>
+
+    <AppFooter />
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+
+<div id="blazor-error-ui" class="bg-danger text-white p-3 position-fixed bottom-0 end-0 m-3 rounded shadow-lg" style="display: none; z-index: 9999;">
+    <div class="d-flex align-items-center gap-3">
+        <span>An unhandled error has occurred.</span>
+        <a href="" class="reload text-white fw-bold text-decoration-underline">Reload</a>
+        <a class="dismiss text-white opacity-75 cursor-pointer" onclick="document.getElementById('blazor-error-ui').style.display='none'">🗙</a>
+    </div>
 </div>

@@ -1,0 +1,77 @@
+<footer class="folio-footer-dark py-5 mt-auto">
+    <div class="container">
+        <div class="row g-4 mb-5">
+            
+            <div class="col-12 col-md-4">
+                <a href="/" class="text-decoration-none d-flex align-items-center mb-3">
+                    <span class="font-serif fw-bold fs-3 text-white tracking-tight">BookRec</span>
+                    <span class="ms-1 fs-4" style="color: var(--folio-terracotta, #b35a42);">•</span>
+                </a>
+                <p class="footer-muted small pe-md-4" style="line-height: 1.6;">
+                    Reimagining book discovery through intelligent recommendation streams, 
+                    curated subject categorization, and personal reading list tracking.
+                </p>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <h6 class="footer-heading mb-3">CURATED STREAMS</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 small">
+                    <li><a href="#subjects" class="footer-link">Programming & Tech</a></li>
+                    <li><a href="#subjects" class="footer-link">Artificial Intelligence</a></li>
+                    <li><a href="#subjects" class="footer-link">Self-Development</a></li>
+                    <li><a href="#subjects" class="footer-link">Finance & Markets</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-5">
+                <h6 class="footer-heading mb-3">PROJECT STACK</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 small footer-muted">
+                    <li><i class="bi bi-check2 me-2" style="color: var(--folio-terracotta, #b35a42);"></i> ASP.NET Core Blazor Interactive Server</li>
+                    <li><i class="bi bi-check2 me-2" style="color: var(--folio-terracotta, #b35a42);"></i> Entity Framework Core + SQLite</li>
+                    <li><i class="bi bi-check2 me-2" style="color: var(--folio-terracotta, #b35a42);"></i> GitHub OAuth Authentication</li>
+                    <li><i class="bi bi-check2 me-2" style="color: var(--folio-terracotta, #b35a42);"></i> Google Books REST API Integration</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="footer-divider mb-4" />
+
+        <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between small footer-muted gap-2">
+            <span>© @DateTime.Now.Year BookRec. BYU-Idaho CSE325 Project.</span>
+            <span>Built with ❤️ using .NET 10 & C#</span>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .folio-footer-dark {
+        background-color: #1a1a1a;
+        color: #8c8c8c;
+    }
+
+    .footer-heading {
+        color: #ffffff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .footer-muted {
+        color: #8c8c8c;
+    }
+
+    .footer-link {
+        color: #8c8c8c;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+        color: #ffffff;
+    }
+
+    .footer-divider {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        opacity: 1;
+    }
+</style>
