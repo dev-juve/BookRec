@@ -1,4 +1,6 @@
 @page "/books"
+@rendermode InteractiveServer
+
 @using BookRec.Data
 @using BookRec.Services
 @using BookRec.Models
@@ -7,14 +9,7 @@
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
-@code 
-{
-    private List<Book>? showAllBooks;
-        protected override async Task OnInitializedAsync()
-        {
-            showAllBooks = await GoogleBookService.SearchBooksAsync();
-        }
-}
+
 <h1 id="all-books-header" class="display-5 font-serif m-0">Full Catalog</h1>
 
 @if (showAllBooks == null)
@@ -26,12 +21,55 @@ else
     <section id="all-books" class="folio-section" style="background-color: var(--folio-cream);">
         <div class="container">
             <div class="row g-4">
+                @* <div class="filter-buttons">
+                    <input class="btn-terracotta" type="button" id="develop" @onclick="PreviousPage" value="Self-Development" />
+                    <input class="btn-terracotta" type="button" id="program" @onclick="NextPage" value="Programming" />
+                    <input class="btn-terracotta" type="button" id="future" @onclick="PreviousPage" value="AI & Future" />
+                    <input class="btn-terracotta" type="button" id="fiction" @onclick="NextPage" value="Novel & Fiction" />
+                    <input class="btn-terracotta" type="button" id="finance" @onclick="PreviousPage" value="Finance & Markets" />
+            </div> *@
                 @foreach (var book in showAllBooks)
                 {
-                    <BookCard Book="book"
-                        OnAddToToReadList="BookService.AddToToReadList" />
+                    <BookCard Book="book" OnAddToToReadList="BookService.AddToToReadList" />
                 }
+            </div>
+            <div class="pagination-buttons">
+                <input class="btn-pagination" type="button" id="previous" @onclick="PreviousPage" value="< Previous" />
+                <span class="page-number">@CurrentPage</span>
+                <input class="btn-pagination" type="button" id="next" @onclick="NextPage" value="Next >" />
             </div>
         </div>
     </section>
 }
+
+@code
+{
+    private int CurrentPage = 1;
+    private List<Book>? showAllBooks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ShowPage();
+    }
+
+    protected async Task NextPage()
+    {
+        CurrentPage++;
+        await ShowPage();
+    }
+
+    protected async Task PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await ShowPage();
+        }
+    }
+
+    protected async Task ShowPage()
+    {
+        showAllBooks = await GoogleBookService.SearchBooksAsync(CurrentPage);
+    }
+}
+

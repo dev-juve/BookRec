@@ -45,7 +45,7 @@
 
     private async Task LoadBooksForCategory(string categoryQuery)
     {
-        var apiBooks = await ApiService.SearchBooksAsync(categoryQuery);
+        var apiBooks = await ApiService.SearchBooksAsync(1, categoryQuery);
         if (apiBooks != null && apiBooks.Any())
         {
             recentBooks = apiBooks.ToList();
