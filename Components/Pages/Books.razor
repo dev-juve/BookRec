@@ -1,0 +1,37 @@
+@page "/books"
+@using BookRec.Data
+@using BookRec.Services
+@using BookRec.Models
+@inject GoogleBooksApiService GoogleBookService
+@inject BookService BookService
+
+<link rel="stylesheet" href="css/folio-theme.css" />
+
+@code 
+{
+    private List<Book>? showAllBooks;
+        protected override async Task OnInitializedAsync()
+        {
+            showAllBooks = await GoogleBookService.SearchBooksAsync();
+        }
+}
+<h1 id="all-books-header" class="display-5 font-serif m-0">Full Catalog</h1>
+
+@if (showAllBooks == null)
+{
+    <p>Pulling books from the shelves...</p>
+}
+else
+{
+    <section id="all-books" class="folio-section" style="background-color: var(--folio-cream);">
+        <div class="container">
+            <div class="row g-4">
+                @foreach (var book in showAllBooks)
+                {
+                    <BookCard Book="book"
+                        OnAddToToReadList="BookService.AddToToReadList" />
+                }
+            </div>
+        </div>
+    </section>
+}
