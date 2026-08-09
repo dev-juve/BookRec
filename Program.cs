@@ -15,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<GoogleBooksApiService>();
 builder.Services.AddSingleton<BookService>();
 
@@ -93,6 +94,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=bookrec.db"));
 
 var app = builder.Build();
+
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+    
+//     SeedData.Initialize(services);
+// }
 
 
 // Configure the HTTP request pipeline.

@@ -119,3 +119,34 @@ h1, h2, h3, h4, .font-serif {
     padding-top: 5rem;
     padding-bottom: 5rem;
 }
+
+    .book-cover-wrapper {
+        background: linear-gradient(145deg, #f3efe6, #faf8f5);
+        height: 220px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+    }
+
+    .book-cover-img {
+        max-height: 180px;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .folio-card:hover .book-cover-img {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+    }
+
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    #all-books-header {
+        padding: 10px;
+    }
