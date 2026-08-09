@@ -24,9 +24,12 @@ public class GoogleBooksApiService
         }
     }
 
-    public async Task<List<Book>> SearchBooksAsync(string categoryQuery = "subject:computers")
+    public async Task<List<Book>> SearchBooksAsync(int page, string categoryQuery = "subject:computers")
     {
-        var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(categoryQuery)}&orderBy=relevance&maxResults=8&key={_apiKey}";
+        int pageSize = 8;
+        int startIndex = (page - 1) * pageSize;
+
+        var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(categoryQuery)}&orderBy=relevance&startIndex={startIndex}&maxResults={pageSize}&key={_apiKey}";
 
         try
         {
