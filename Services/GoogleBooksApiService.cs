@@ -61,6 +61,7 @@ public class GoogleBooksApiService
                 return new Book
                 {
                     Id = index + 100,
+                    GoogleBookId = item.Id ?? string.Empty,
                     Title = item.VolumeInfo?.Title ?? "Untitled",
                     Author = item.VolumeInfo?.Authors != null ? string.Join(", ", item.VolumeInfo.Authors) : "Unknown Author",
                     Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
@@ -97,8 +98,12 @@ public class GoogleBooksResponse
 
 public class GoogleBookItem
 {
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+    
     [JsonPropertyName("volumeInfo")]
     public VolumeInfo? VolumeInfo { get; set; }
+
 }
 
 public class VolumeInfo

@@ -1,3 +1,5 @@
+@rendermode InteractiveServer
+
 @using BookRec.Models
 @using BookRec.Services
 @inject BookService BookService
@@ -37,7 +39,7 @@
 
                         <div class="mt-3 pt-3 border-top d-grid" style="border-color: var(--folio-sand) !important;">
                             <button class="btn-outline-sand btn-sm text-center py-2 d-flex align-items-center justify-content-center gap-1" 
-                                    @onclick="() => BookService.AddToToReadList(book)">
+                                    @onclick="() => BookService.AddToReadList(book)">
                                 <i class="bi bi-plus-lg"></i> Add to To-Read
                             </button>
                         </div>

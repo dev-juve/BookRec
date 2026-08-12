@@ -3,6 +3,7 @@ using System;
 using BookRec.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookRec.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812055257_AddGoogleBookIdToBook")]
+    partial class AddGoogleBookIdToBook
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
@@ -40,9 +43,6 @@ namespace BookRec.Migrations
 
                     b.Property<string>("GoogleBookId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DisplayCategory")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsBestseller")
@@ -120,31 +120,6 @@ namespace BookRec.Migrations
                     b.HasIndex("BookId");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("BookRec.Models.SearchFeedback", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHelpful")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Query")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SearchFeedbacks");
                 });
 
             modelBuilder.Entity("BookRec.Models.SearchHistory", b =>
