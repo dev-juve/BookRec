@@ -12,6 +12,8 @@ public class Book
     public string CoverImageUrl { get; set; } = "https://via.placeholder.com/150x220?text=No+Cover";
     
     public List<Review> Reviews { get; set; } = new();
+
+    public string? DisplayCategory { get; set; }
     
     public double AverageRating => Reviews.Any() ? Reviews.Average(r => r.StarRating) : 0.0;
 }
