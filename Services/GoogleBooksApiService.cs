@@ -24,12 +24,12 @@ public class GoogleBooksApiService
         }
     }
 
-    public async Task<List<Book>> SearchBooksAsync(int page, string categoryQuery = "subject:computers")
+    public async Task<List<Book>> SearchBooksAsync(string categoryQuery = "a", int pageNumber = 1)
     {
-        int pageSize = 8;
-        int startIndex = (page - 1) * pageSize;
+        int maxResults = 12;
+        int startIndex = (pageNumber - 1) * maxResults;
 
-        var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(categoryQuery)}&orderBy=relevance&startIndex={startIndex}&maxResults={pageSize}&key={_apiKey}";
+        var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(categoryQuery)}&orderBy=relevance&startIndex={startIndex}&maxResults={maxResults}&key={_apiKey}";
 
         try
         {
@@ -44,21 +44,33 @@ public class GoogleBooksApiService
 
             if (result?.Items == null || !result.Items.Any())
                 return GetFallbackBooks();
-            Console.WriteLine($"[Service] Returning {result.Items.Count} live books from API!"); // test api
-            return result.Items.Select((item, index) => new Book
+
+            return result.Items.Select((item, index) => 
             {
-                Id = index + 100,
-                GoogleBookId = item.Id ?? string.Empty,
-                Title = item.VolumeInfo?.Title ?? "Untitled",
-                Author = item.VolumeInfo?.Authors != null ? string.Join(", ", item.VolumeInfo.Authors) : "Unknown Author",
-                Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
-                Description = item.VolumeInfo?.Description ?? "No description available for this volume.",
-                CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?
-                .Replace("http://", "https://")
-                .Replace("&edge=curl", "")
-                .Replace("zoom=1", "zoom=2")
-                ?? "https://via.placeholder.com/150x220?text=No+Cover",
-                IsBestseller = index % 3 == 0
+                // try to get the first category from Google Books
+                var googleCategory = item.VolumeInfo?.Categories?.FirstOrDefault();
+                
+                BookCategory mappedCategory = BookCategory.SelfDevelopment; 
+                
+                if (!string.IsNullOrEmpty(googleCategory))
+                {
+                    // remove spaces
+                    Enum.TryParse<BookCategory>(googleCategory.Replace(" ", ""), true, out mappedCategory);
+                }
+
+                return new Book
+                {
+                    Id = index + 100,
+                    Title = item.VolumeInfo?.Title ?? "Untitled",
+                    Author = item.VolumeInfo?.Authors != null ? string.Join(", ", item.VolumeInfo.Authors) : "Unknown Author",
+                    Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
+                    Description = item.VolumeInfo?.Description ?? "No description available for this volume.",
+                    CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?.Replace("http://", "https://") ?? "https://via.placeholder.com/150x220?text=No+Cover",
+                    
+                    DisplayCategory = googleCategory ?? mappedCategory.ToString(), 
+                    
+                    IsBestseller = index % 3 == 0
+                };
             }).ToList();
         }
         catch
@@ -109,6 +121,9 @@ public class VolumeInfo
 
     [JsonPropertyName("imageLinks")]
     public ImageLinks? ImageLinks { get; set; }
+    
+    [JsonPropertyName("categories")]
+    public List<string>? Categories { get; set; }
 }
 
 public class ImageLinks

@@ -1,17 +1,17 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 @using BookRec.Models
 @using BookRec.Services
 @using BookRec.Components.Landing
 @inject BookService BookService
 @inject GoogleBooksApiService ApiService
+@inject NavigationManager Navigation
 
 <PageTitle>BookRec • Reimagining Book Discovery</PageTitle>
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
 <div class="folio-landing-wrapper">
-    <LandingHeader />
-
     <HeroSection />
 
     <CreedBanner />
@@ -37,15 +37,14 @@
         await LoadBooksForCategory(currentSubject);
     }
 
-    private async Task HandleSubjectSelected(string categoryQuery)
+    private void HandleSubjectSelected(string categoryQuery)
     {
-        currentSubject = categoryQuery;
-        await LoadBooksForCategory(categoryQuery);
+        Navigation.NavigateTo($"/books?q={Uri.EscapeDataString(categoryQuery)}");
     }
 
     private async Task LoadBooksForCategory(string categoryQuery)
     {
-        var apiBooks = await ApiService.SearchBooksAsync(1, categoryQuery);
+        var apiBooks = await ApiService.SearchBooksAsync(categoryQuery, 1);
         if (apiBooks != null && apiBooks.Any())
         {
             recentBooks = apiBooks.ToList();

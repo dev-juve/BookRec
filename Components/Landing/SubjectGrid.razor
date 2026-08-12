@@ -1,4 +1,4 @@
-@using BookRec.Models
+@inject NavigationManager Navigation
 
 <section id="subjects" class="folio-section py-5">
     <div class="container">
@@ -42,13 +42,9 @@
         new("Finance & Markets", "subject:business", "bi bi-graph-up-arrow", 78)
     };
 
-    private async Task SelectSubject(string query)
+    private void SelectSubject(string queryValue)
     {
-        SelectedCategory = query;
-        if (OnSubjectSelected.HasDelegate)
-        {
-            await OnSubjectSelected.InvokeAsync(query);
-        }
+        Navigation.NavigateTo($"/books?q={Uri.EscapeDataString(queryValue)}");
     }
 
     public record SubjectItem(string Name, string QueryValue, string IconClass, int RecommendationCount);

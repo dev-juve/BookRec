@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<UserBook> UserBooks => Set<UserBook>();
     public DbSet<BookReview> BookReviews => Set<BookReview>();
     public DbSet<SearchHistory> SearchHistories => Set<SearchHistory>();
+    public DbSet<SearchFeedback> SearchFeedbacks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

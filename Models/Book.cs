@@ -13,6 +13,8 @@ public class Book
     public string GoogleBookId { get; set; } = string.Empty;
     
     public List<Review> Reviews { get; set; } = new();
+
+    public string? DisplayCategory { get; set; }
     
     public double AverageRating => Reviews.Any() ? Reviews.Average(r => r.StarRating) : 0.0;
 }
