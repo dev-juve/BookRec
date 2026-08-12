@@ -1,20 +1,118 @@
 @page "/dashboard"
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using BookRec.Data
 @using BookRec.Services
+@using BookRec.Models
+
 @inject UserService userService
+@inject BookService BookService
+
+
+<link rel="stylesheet" href="css/folio-theme.css" />
 
     <AuthorizeView>
         <Authorized>
             <div class="d-flex align-items-center gap-3">
-                <h1>UserProfile</h1>
-                <span class="fw-semibold small"><h2>@userService.Name</h2></span>
+                <h1 id="user-profile-header" class="display-5 font-serif m-0">User Profile</h1>
             </div>
+
+            <section id="user-dashboard" class="folio-section" style="background-color: var(--folio-cream);">
+                <div class="row g-4">                    
+                    <div id="profile" class="col-md-2">
+                        <span class="fw-semibold small"><h2>@userService.Name</h2></span>
+                        <p>@userService.UserName</p>
+                        <p>@userService.Email</p>
+                        <p>@userService.AvatarUrl</p>
+                    </div>
+                    <div id="reading-list" class="col-md-5">
+                        <h3>Reading List</h3>
+                        @if (showReadingList?.Count > 0)
+                        {
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Cover</th>
+                                        <th>Title</th>
+                                        <th>Author</th>                                        
+                                        <th>Status</th>                                      
+                                        <th>Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var book in showReadingList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <img src="@book.CoverImageUrl" 
+                                                alt="Book.Title" 
+                                                style="width: 40px; height: 55px; object-fit: cover;"/>
+                                            </td>
+                                            <td>
+                                                @book.Title
+                                            </td>
+                                            <td>
+                                                @book.Author
+                                            </td>
+                                            @* <td>
+                                                @book.Status
+                                            </td> *@
+                                            <td>
+                                                <button @onclick="() => RemoveFromReadingList(book.Id)">✖</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <a href="/books" class="btn-terracotta">Return to Catalog</a>
+                        }
+                        else
+                        {
+                            <p>There are no books in your reading list</p>
+                            <a href="/books" class="btn-terracotta">Go to the Catalog</a>
+                        }
+                       
+                    </div>
+                    <div id="reviews" class="col-md-5">
+                        <h3>Recommendations</h3>
+                    </div>
+                </div>
+            </section>
         </Authorized>
 
         <NotAuthorized>
-            <div class="d-flex align-items-center gap-3">
+            <div id="dashboard-signin" class="d-flex flex-column justify-content-center align-items-center">
+                <h3>Please sign in to access your dashboard</h3>
                 <a href="/signin" class="btn-dark-solid">Sign In with GitHub</a>
             </div>
         </NotAuthorized>
     </AuthorizeView>
+
+    @code {
+        private List<Book>? showReadingList;
+
+        protected override async Task OnInitializedAsync()
+        {
+            await userService.GetUserAsync();
+            await ShowReadingList();
+        }
+        protected async Task ShowReadingList()
+        {
+            showReadingList = BookService.GetToReadList();
+        }
+
+        protected async Task AddToReadingList(Book book)
+        {
+            BookService.AddToReadList(book);
+            await ShowReadingList();
+        }
+
+        protected async Task RemoveFromReadingList(int id)
+        {
+            BookService.RemoveFromToReadList(id);
+            await ShowReadingList();
+        }
+    }
+
+    

@@ -1,17 +1,22 @@
 using BookRec.Models;
+using BookRec.Data;
+
 
 namespace BookRec.Services;
 
 public class BookService
 {
+    private readonly AppDbContext _context;
     private readonly List<Book> _books = new();
     private readonly List<Book> _userToReadList = new();
     private readonly List<Book> _userSuggestions = new();
 
-    public BookService()
+    public BookService(AppDbContext context)
     {
+        _context = context;
         SeedMockData();
     }
+
 
     // search/query
     public List<Book> GetAllBooks() => _books;
@@ -34,9 +39,23 @@ public class BookService
     }
 
     // user book list
-    public List<Book> GetToReadList() => _userToReadList;
+    public List<Book> GetToReadList()
+    {
+        return _userToReadList;
+        
+    }
+    public async Task AddToReadList(Book book, string userId)
+    {
+        var UserBook = new UserBook
+        {
+            UserId = userId,
+            GoogleBookId = book.GoogleBookId
+        };
 
-    public void AddToToReadList(Book book)
+        _context.UserBooks.Add(UserBook);
+        await _context.SaveChangesAsync();
+    }
+    public void AddToReadList(Book book)
     {
         if (!_userToReadList.Any(b => b.Id == book.Id))
         {
@@ -48,6 +67,12 @@ public class BookService
     {
         var book = _userToReadList.FirstOrDefault(b => b.Id == bookId);
         if (book != null) _userToReadList.Remove(book);
+    }
+
+    public void UpdateToReadList(int bookId, string readStatus)
+    {
+        var book = _userToReadList.FirstOrDefault(b => b.Id == bookId);
+        // if (book != null) book.Status = readStatus;
     }
 
     // review

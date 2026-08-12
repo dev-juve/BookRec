@@ -10,6 +10,7 @@ public class Book
     public bool IsBestseller { get; set; }
     public string Description { get; set; } = string.Empty;
     public string CoverImageUrl { get; set; } = "https://via.placeholder.com/150x220?text=No+Cover";
+    public string GoogleBookId { get; set; } = string.Empty;
     
     public List<Review> Reviews { get; set; } = new();
 
