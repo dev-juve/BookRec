@@ -17,7 +17,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<GoogleBooksApiService>();
-builder.Services.AddSingleton<BookService>();
+builder.Services.AddScoped<BookService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserService>();

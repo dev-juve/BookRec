@@ -30,7 +30,7 @@ else
             </div> *@
                 @foreach (var book in showAllBooks)
                 {
-                    <BookCard Book="book" OnAddToToReadList="BookService.AddToToReadList" />
+                    <BookCard Book="book" OnAddToToReadList="BookService.AddToReadList" />
                 }
             </div>
             <div class="pagination-buttons">
