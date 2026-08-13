@@ -7,6 +7,8 @@
 @inject BookService BookService
 @inject NavigationManager Navigation
 @inject BookRec.Data.AppDbContext DbContext
+@inject UserService UserService
+
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
@@ -71,7 +73,7 @@
                         @foreach (var book in showAllBooks)
                         {
                             <div class="col d-flex align-items-stretch" style="min-width: 0;">
-                                <BookCard Book="book" OnAddToToReadList="BookService.AddToReadList" />
+                                <BookCard Book="book" OnAddToToReadList="AddToReadingList" />
                             </div>
                         }
                     </div>
@@ -212,6 +214,16 @@
         {
             CurrentPage--;
             await LoadCatalog();
+        }
+    }
+
+    private async Task AddToReadingList(Book book)
+    {
+        await UserService.GetUserAsync();
+
+        if (UserService.Id != null)
+        {
+            await BookService.AddToReadList(book, UserService.Id);
         }
     }
 
