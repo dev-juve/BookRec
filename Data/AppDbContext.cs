@@ -1,36 +1,48 @@
-using Microsoft.EntityFrameworkCore;
 using BookRec.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookRec.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-    public DbSet <Book> Books { get; set; }
-    public DbSet <Review> Reviews { get; set; }
-    public DbSet<User> Users => Set<User>();
-    public DbSet<UserBook> UserBooks => Set<UserBook>();
-    public DbSet<BookReview> BookReviews => Set<BookReview>();
-    public DbSet<SearchHistory> SearchHistories => Set<SearchHistory>();
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
+
+    public DbSet<User> Users { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+    public DbSet<SearchHistory> SearchHistories { get; set; }
     public DbSet<SearchFeedback> SearchFeedbacks { get; set; }
+    public DbSet<UserToReadBook> UserToReadBooks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<UserBook>()
-            .HasOne(ub => ub.User)
-            .WithMany(u => u.SavedBooks)
-            .HasForeignKey(ub => ub.UserId);
-
-        modelBuilder.Entity<BookReview>()
-            .HasOne(br => br.User)
+        // explicitly define the relationships
+        
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.User)
             .WithMany(u => u.Reviews)
-            .HasForeignKey(br => br.UserId);
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<SearchHistory>()
             .HasOne(sh => sh.User)
             .WithMany(u => u.SearchHistories)
-            .HasForeignKey(sh => sh.UserId);
+            .HasForeignKey(sh => sh.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<SearchFeedback>()
+            .HasOne(sf => sf.User)
+            .WithMany(u => u.SearchFeedbacks)
+            .HasForeignKey(sf => sf.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserToReadBook>()
+            .HasOne(urb => urb.User)
+            .WithMany(u => u.SavedBooks)
+            .HasForeignKey(urb => urb.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

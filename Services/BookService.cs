@@ -55,13 +55,23 @@ public class BookService
         _context.UserBooks.Add(UserBook);
         await _context.SaveChangesAsync();
     }
-    public void AddToReadList(Book book)
+    public async Task AddToReadList(Book book, string userId) 
+{
+    var newSavedBook = new UserToReadBook
     {
-        if (!_userToReadList.Any(b => b.Id == book.Id))
-        {
-            _userToReadList.Add(book);
-        }
-    }
+        UserId = userId, // Ensure we are saving the relational user ID
+        GoogleBookId = book.Id.ToString(),
+        Title = book.Title,
+        Author = book.Author,
+        Status = "To-Read",
+        AddedAt = DateTime.UtcNow
+        // Note: CoverImageUrl is completely removed here!
+    };
+
+    // Use the new UserToReadBooks DbSet
+    _dbContext.UserToReadBooks.Add(newSavedBook); 
+    await _dbContext.SaveChangesAsync();
+}
 
     public void RemoveFromToReadList(int bookId)
     {

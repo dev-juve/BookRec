@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BookRec.Models;
 
-public class UserBook
+public class UserToReadBook
 {
     public int Id { get; set; }
 
@@ -14,8 +14,9 @@ public class UserBook
     public string GoogleBookId { get; set; } = string.Empty;
 
     public string Title { get; set; } = string.Empty;
+    
     public string Author { get; set; } = string.Empty;
-    public string? CoverImageUrl { get; set; }
+    
     public string Status { get; set; } = "To-Read"; // "To-Read", "Reading", "Completed"
 
     public DateTime AddedAt { get; set; } = DateTime.UtcNow;

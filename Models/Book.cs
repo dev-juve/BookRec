@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BookRec.Models;
 
 public class Book
@@ -12,6 +14,7 @@ public class Book
     public string CoverImageUrl { get; set; } = "https://via.placeholder.com/150x220?text=No+Cover";
     public string GoogleBookId { get; set; } = string.Empty;
     
+    [NotMapped]
     public List<Review> Reviews { get; set; } = new();
 
     public string? DisplayCategory { get; set; }
