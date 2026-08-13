@@ -29,7 +29,7 @@
                     <p>@userService.Email</p>
                     <p>@userService.AvatarUrl</p>
                 </div>
-                <div id="reading-list" class="col-md-5">
+                <div id="reading-list" class="col-md-10">
                     <h3>Reading List</h3>
                     @if (showReadingList?.Count > 0)
                     {
@@ -51,7 +51,7 @@
                                             <img src="@book.CoverImageUrl" alt="@book.Title"
                                                  style="width: 40px; height: 55px; object-fit: cover;" />
                                         </td>
-                                        <td>
+                                        <td id="title">
                                             @book.Title
                                         </td>
                                         <td>
@@ -81,9 +81,6 @@
                         <a href="/books" class="btn-terracotta">Go to the Catalog</a>
                     }
 
-                </div>
-                <div id="reviews" class="col-md-5">
-                    <h3>Recommendations</h3>
                 </div>
             </div>
         </section>
