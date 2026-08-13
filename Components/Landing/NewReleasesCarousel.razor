@@ -17,14 +17,11 @@
             </a>
         </div>
 
-        <div class="add-message"
-            @if (!string.IsNullOrEmpty(addMessage))
-            {
-                <div class="alert-success" role="alert">
-                    @addMessage
-                </div>
-            }
-        </div>
+        @if (addMessage != null) 
+        { 
+            <div class="alert alert-success mb-4"> 
+                @addMessage </div> 
+        }
 
         <div class="row g-4">
             @foreach (var book in DisplayBooks)
