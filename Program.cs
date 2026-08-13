@@ -11,7 +11,6 @@ Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -22,14 +21,12 @@ builder.Services.AddScoped<BookService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserService>();
 
-// retrieve github OAuth credentials from .env
 var githubClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID") 
     ?? throw new InvalidOperationException("GITHUB_CLIENT_ID is missing from .env");
 
 var githubClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET") 
     ?? throw new InvalidOperationException("GITHUB_CLIENT_SECRET is missing from .env");
 
-// Add authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "Cookies";
@@ -89,13 +86,14 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-// register DbContext with SQLite
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite("Data Source=bookrec.db"));
+
+builder.Services.AddScoped<AppDbContext>(p => 
+    p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
 var app = builder.Build();
 
-// Create DB
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -111,18 +109,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-// for authentication
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();

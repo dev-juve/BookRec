@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using BookRec.Models;
 
@@ -6,7 +7,6 @@ namespace BookRec.Services;
 public class GoogleBooksApiService
 {
     private readonly HttpClient _httpClient;
-
     private readonly string _apiKey;
 
     public GoogleBooksApiService(HttpClient httpClient)
@@ -21,6 +21,38 @@ public class GoogleBooksApiService
         if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
         {
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "BookRecApp/1.0");
+        }
+    }
+
+    public async Task<Book?> GetBookByIdAsync(string bookId)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"https://www.googleapis.com/books/v1/volumes/{bookId}?key={_apiKey}");
+            
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("volumeInfo", out var volumeInfo))
+            {
+                return new Book
+                {
+                    Id = 0,
+                    GoogleBookId = root.GetProperty("id").GetString() ?? bookId,
+                    Title = volumeInfo.TryGetProperty("title", out var title) ? title.GetString() ?? "Unknown Title" : "Unknown Title",
+                    Author = volumeInfo.TryGetProperty("authors", out var authors) && authors.GetArrayLength() > 0 ? authors[0].GetString() ?? "Unknown Author" : "Unknown Author",
+                    Description = volumeInfo.TryGetProperty("description", out var desc) ? desc.GetString() ?? "No description available." : "No description available.",
+                    CoverImageUrl = volumeInfo.TryGetProperty("imageLinks", out var images) && images.TryGetProperty("thumbnail", out var thumbnail) ? thumbnail.GetString()?.Replace("http:", "https:") ?? "/images/fallback/clean-code.jpg" : "/images/fallback/clean-code.jpg"
+                };
+            }
+            return null;
+        }
+        catch
+        {
+            return null;
         }
     }
 
@@ -47,14 +79,11 @@ public class GoogleBooksApiService
 
             return result.Items.Select((item, index) =>
             {
-                // try to get the first category from Google Books
                 var googleCategory = item.VolumeInfo?.Categories?.FirstOrDefault();
-
                 BookCategory mappedCategory = BookCategory.SelfDevelopment;
 
                 if (!string.IsNullOrEmpty(googleCategory))
                 {
-                    // remove spaces
                     Enum.TryParse<BookCategory>(googleCategory.Replace(" ", ""), true, out mappedCategory);
                 }
 
@@ -67,9 +96,7 @@ public class GoogleBooksApiService
                     Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
                     Description = item.VolumeInfo?.Description ?? "No description available for this volume.",
                     CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?.Replace("http://", "https://") ?? "https://via.placeholder.com/150x220?text=No+Cover",
-
                     DisplayCategory = googleCategory ?? mappedCategory.ToString(),
-
                     IsBestseller = index % 3 == 0
                 };
             }).ToList();
@@ -87,6 +114,7 @@ public class GoogleBooksApiService
             new Book 
             { 
                 Id = 1, 
+                GoogleBookId = "XfFvDwAAQBAJ",
                 Title = "Atomic Habits", 
                 Author = "James Clear", 
                 Category = BookCategory.SelfDevelopment, 
@@ -98,6 +126,7 @@ public class GoogleBooksApiService
             new Book 
             { 
                 Id = 2, 
+                GoogleBookId = "_i6bDeoCQzsC",
                 Title = "Clean Code", 
                 Author = "Robert C. Martin", 
                 Category = BookCategory.Programming, 
@@ -123,7 +152,6 @@ public class GoogleBookItem
 
     [JsonPropertyName("volumeInfo")]
     public VolumeInfo? VolumeInfo { get; set; }
-
 }
 
 public class VolumeInfo

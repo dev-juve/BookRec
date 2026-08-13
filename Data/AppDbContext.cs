@@ -10,6 +10,8 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
+    public DbSet<Book> Books { get; set; } 
+    public DbSet<LocalBook> LocalBooks { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<SearchHistory> SearchHistories { get; set; }
     public DbSet<SearchFeedback> SearchFeedbacks { get; set; }

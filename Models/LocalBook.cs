@@ -2,24 +2,26 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BookRec.Models;
 
-public class UserToReadBook
+public class LocalBook
 {
+    [Key]
     public int Id { get; set; }
-
-    [Required]
-    public string UserId { get; set; } = string.Empty;
-    public User? User { get; set; }
 
     [Required]
     public string GoogleBookId { get; set; } = string.Empty;
 
+    [Required]
     public string Title { get; set; } = string.Empty;
     
     public string Author { get; set; } = string.Empty;
-
+    
+    public string? Description { get; set; }
+    
     public string? CoverImageUrl { get; set; }
     
-    public string Status { get; set; } = "To-Read"; 
-
-    public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+    public string? Category { get; set; }
+    
+    public bool IsTrending { get; set; } 
+    
+    public DateTime AddedToDatabaseAt { get; set; } = DateTime.UtcNow;
 }

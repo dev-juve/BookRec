@@ -2,147 +2,240 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
 @using BookRec.Data
 @using BookRec.Services
 @using BookRec.Models
 
-
 @inject UserService userService
 @inject BookService BookService
+@inject NavigationManager Navigation
+@inject IDbContextFactory<AppDbContext> DbFactory
 
+<PageTitle>User Dashboard • BookRec</PageTitle>
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
 <AuthorizeView>
     <Authorized>
-        <div class="d-flex align-items-center gap-3">
-            <h1 id="user-profile-header" class="display-5 font-serif m-0">User Profile</h1>
-        </div>
+        <section class="folio-section" style="background-color: var(--folio-cream); min-height: 85vh;">
+            <div class="container max-w-1200">
+                <div class="row g-5">
+                    
+                    <!-- left column: user profile & history -->
+                    <div class="col-12 col-lg-3 text-center text-lg-start d-flex flex-column gap-4">
+                    
+                        <div class="folio-card p-4 bg-white rounded-4 shadow-sm border" style="border-color: var(--folio-sand) !important;">
+                            <div class="text-center mb-3">
+                                <img src="@(string.IsNullOrWhiteSpace(userService.AvatarUrl) ? "https://via.placeholder.com/150/6c757d/ffffff?text=U" : userService.AvatarUrl)" 
+                                     alt="@userService.Name" 
+                                     class="rounded-circle shadow-sm border" 
+                                     style="width: 120px; height: 120px; object-fit: cover; border-color: var(--folio-sand) !important;" />
+                            </div>
+                            
+                            <div class="text-center">
+                                <h4 class="font-serif fw-bold text-dark mb-1">@userService.Name</h4>
+                                <p class="text-muted small mb-2 fw-medium">@@@userService.UserName</p>
+                                
+                                @if (!string.IsNullOrWhiteSpace(userService.Email))
+                                {
+                                    <span class="badge bg-light text-dark border fw-normal px-3 py-2 rounded-pill" style="border-color: var(--folio-sand) !important;">
+                                        <i class="bi bi-envelope me-1"></i> @userService.Email
+                                    </span>
+                                }
+                            </div>
+                        </div>
 
-        <section id="user-dashboard" class="folio-section" style="background-color: var(--folio-cream);">
-            <div class="row g-4">
-                <div id="profile" class="col-md-2">
-                    <span class="fw-semibold small">
-                        <h2>@userService.Name</h2>
-                    </span>
-                    <p>@userService.UserName</p>
-                    <p>@userService.Email</p>
-                    <p>@userService.AvatarUrl</p>
-                </div>
-                <div id="reading-list" class="col-md-10">
-                    <h3>Reading List</h3>
-                    @if (showReadingList?.Count > 0)
-                    {
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Cover</th>
-                                    <th>Title</th>
-                                    <th>Author</th>
-                                    <th>Status</th>
-                                    <th>Remove</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div class="folio-card p-4 bg-white rounded-4 shadow-sm border" style="border-color: var(--folio-sand) !important;">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-clock-history text-muted"></i>
+                                <h6 class="font-serif fw-bold text-dark m-0">Recent Searches</h6>
+                            </div>
+                            
+                            @if (searchHistory == null)
+                            {
+                                <div class="text-center py-3">
+                                    <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                                </div>
+                            }
+                            else if (!searchHistory.Any())
+                            {
+                                <p class="text-muted small m-0 text-center bg-light p-3 rounded">No recent searches.</p>
+                            }
+                            else
+                            {
+                                <ul class="list-unstyled m-0 d-flex flex-column gap-2">
+                                    @foreach(var log in searchHistory)
+                                    {
+                                        <li class="small bg-light p-2 px-3 rounded border text-truncate transition-hover cursor-pointer" title="@log.SearchQuery">
+                                            <i class="bi bi-search me-2 text-muted" style="font-size: 0.75rem;"></i>
+                                            <span class="fw-medium text-dark">@log.SearchQuery</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- right column: reading list -->
+                    <div class="col-12 col-lg-9">
+                        <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3" style="border-color: var(--folio-sand) !important;">
+                            <div>
+                                <span class="eyebrow-tag">YOUR PERSONAL SPACE</span>
+                                <h2 class="display-6 font-serif m-0">Reading List</h2>
+                            </div>
+                            <a href="/books" class="btn btn-sm btn-outline-dark rounded-pill px-4 d-none d-sm-inline-block transition-hover">
+                                Browse Catalog
+                            </a>
+                        </div>
+
+                        @if (showReadingList == null)
+                        {
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-secondary" role="status"></div>
+                            </div>
+                        }
+                        else if (!showReadingList.Any())
+                        {
+                            <div class="text-center py-5 bg-white rounded-4 border shadow-sm" style="border-color: var(--folio-sand) !important;">
+                                <i class="bi bi-bookmark-dash fs-1 text-muted mb-3 d-block"></i>
+                                <h5 class="fw-bold text-dark font-serif">Your reading list is empty</h5>
+                                <p class="text-muted small mb-4">It looks like you haven't added any books yet.</p>
+                                <a href="/books" class="btn btn-dark rounded-pill px-4">Explore the Catalog</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column gap-3">
                                 @foreach (var book in showReadingList)
                                 {
-                                    <tr @key="book.Id">
-                                        <td>
-                                            <img src="@book.CoverImageUrl" alt="@book.Title"
-                                                 style="width: 40px; height: 55px; object-fit: cover;" />
-                                        </td>
-                                        <td id="title">
-                                            @book.Title
-                                        </td>
-                                        <td>
-                                            @book.Author
-                                        </td>
-                                        <td>
-                                            <select value="@book.Status"
-                                                    @onchange="async e => await UpdateReadStatus(book.Id, e.Value?.ToString())">
+                                    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-3 bg-white rounded-4 border transition-hover shadow-sm gap-3" style="border-color: var(--folio-sand) !important;">
+                                        
+                                        <!-- Left Side: Clickable Cover & Info -->
+                                        <div class="d-flex align-items-center gap-3 cursor-pointer flex-grow-1" @onclick="() => NavigateToBook(book.GoogleBookId)">
+                                            <div class="rounded shadow-sm overflow-hidden" style="min-width: 60px; height: 85px; background: #f8f9fa;">
+                                                <img src="@book.CoverImageUrl" alt="@book.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+                                            </div>
+                                            <div>
+                                                <h6 class="font-serif fw-bold text-dark m-0 mb-1">@book.Title</h6>
+                                                <span class="text-muted small d-block">by @(string.IsNullOrWhiteSpace(book.Author) ? "Unknown Author" : book.Author)</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- actions -->
+                                        <div class="d-flex align-items-center gap-2 w-100 w-sm-auto" @onclick:stopPropagation="true">
+                                            <select class="form-select form-select-sm border bg-light rounded-pill px-3 shadow-none fw-medium" 
+                                                    value="@book.Status"
+                                                    @onchange="async e => await UpdateReadStatus(book.Id, e.Value?.ToString())"
+                                                    style="width: 140px; cursor: pointer; border-color: var(--folio-sand) !important;">
                                                 <option value="To-Read">To-Read</option>
-                                                <option value="Reading">Reading</option>
+                                                <option value="Reading">Currently Reading</option>
                                                 <option value="Completed">Completed</option>
-
                                             </select>
-                                        </td>
-                                        <td>
-                                            <button @onclick="() => RemoveFromReadingList(book.Id)">✖</button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        <a href="/books" class="btn-terracotta">Return to Catalog</a>
-                    }
-                    else
-                    {
-                        <p>There are no books in your reading list</p>
-                        <a href="/books" class="btn-terracotta">Go to the Catalog</a>
-                    }
+                                            
+                                            <button class="btn btn-sm btn-outline-danger rounded-circle p-2 d-flex align-items-center justify-content-center transition-hover" 
+                                                    @onclick="() => RemoveFromReadingList(book.Id)" 
+                                                    style="width: 34px; height: 34px;"
+                                                    title="Remove from list">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </div>
 
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </section>
     </Authorized>
 
     <NotAuthorized>
-        <div id="dashboard-signin" class="d-flex flex-column justify-content-center align-items-center">
-            <h3>Please sign in to access your dashboard</h3>
-            <a href="/signin" class="btn-dark-solid">Sign In with GitHub</a>
-        </div>
+        <section class="folio-section d-flex align-items-center justify-content-center" style="background-color: var(--folio-cream); min-height: 80vh;">
+            <div class="text-center bg-white p-5 rounded-4 border shadow-sm" style="border-color: var(--folio-sand) !important; max-width: 500px;">
+                <i class="bi bi-person-lock fs-1 text-muted mb-3 d-block"></i>
+                <h3 class="font-serif fw-bold text-dark mb-3">Authentication Required</h3>
+                <p class="text-muted mb-4">Please sign in to access your personal dashboard and reading lists.</p>
+                <a href="/signin" class="btn btn-dark rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-github"></i> Sign In with GitHub
+                </a>
+            </div>
+        </section>
     </NotAuthorized>
 </AuthorizeView>
 
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .transition-hover { transition: all 0.2s ease; }
+    .transition-hover:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important; }
+    .w-sm-auto { width: auto !important; }
+    @@media (max-width: 575.98px) {
+        .w-sm-auto { width: 100% !important; justify-content: space-between; }
+    }
+</style>
+
 @code {
-    private List<UserBook>? showReadingList;
+    private List<UserToReadBook>? showReadingList;
+    private List<SearchHistory>? searchHistory; // Holds the last 3 logs
 
     protected override async Task OnInitializedAsync()
     {
         await userService.GetUserAsync();
         await ShowReadingList();
+        await LoadSearchHistory();
     }
+
     protected async Task ShowReadingList()
     {
-        await userService.GetUserAsync();
-
         if (userService.Id != null)
         {
             showReadingList = await BookService.GetToReadList(userService.Id);
         }
     }
 
-    protected async Task AddToReadingList(Book book)
+    private async Task LoadSearchHistory()
     {
         if (userService.Id != null)
         {
-            await BookService.AddToReadList(book, userService.Id);
-            await ShowReadingList();
+            using var context = await DbFactory.CreateDbContextAsync();
+            
+            // fetches the last 3 search logs for this specific user
+            searchHistory = await context.SearchHistories
+                .Where(sh => sh.UserId == userService.Id)
+                .OrderByDescending(sh => sh.Id) 
+                .Take(3)
+                .ToListAsync();
+        }
+        else
+        {
+            searchHistory = new List<SearchHistory>();
         }
     }
 
     protected async Task RemoveFromReadingList(int id)
     {
-
         if (userService.Id != null)
-
+        {
             await BookService.RemoveFromReadList(id, userService.Id);
-        await ShowReadingList();
+            await ShowReadingList();
+        }
     }
 
     protected async Task UpdateReadStatus(int userBookId, string? status)
     {
-
         if (userService.Id != null && status != null)
         {
-            await BookService.UpdateReadList(
-                userBookId,
-                userService.Id,
-                status);
-
+            await BookService.UpdateReadList(userBookId, userService.Id, status);
             await ShowReadingList();
         }
     }
-}
 
-    
+    private void NavigateToBook(string googleBookId)
+    {
+        if (!string.IsNullOrWhiteSpace(googleBookId))
+        {
+            Navigation.NavigateTo($"/book/{googleBookId}");
+        }
+    }
+}

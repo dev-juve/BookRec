@@ -5,9 +5,9 @@ using BookRec.Models;
 public class UserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly BookRec.Data.AppDbContext _context;
+    private readonly AppDbContext _context;
 
-    public UserService(IHttpContextAccessor httpContextAccessor, BookRec.Data.AppDbContext context)
+    public UserService(IHttpContextAccessor httpContextAccessor, AppDbContext context)
     {
         _httpContextAccessor = httpContextAccessor;
         _context = context;
@@ -46,6 +46,7 @@ public class UserService
 
         await _context.SaveChangesAsync();
     }
+
     public ClaimsPrincipal? User => 
         _httpContextAccessor.HttpContext?.User;
 
@@ -60,6 +61,12 @@ public class UserService
     public string? Name => 
         User?.FindFirst("urn:github:name")?.Value;
 
-    public string? AvatarUrl => User?.FindFirst("urn:github:avatar")?.Value;
-
+    public string? AvatarUrl
+    {
+        get
+        {
+            var url = User?.FindFirst("urn:github:avatar_url")?.Value ?? User?.FindFirst("urn:github:avatar")?.Value;
+            return !string.IsNullOrEmpty(url) ? url : "https://via.placeholder.com/150/6c757d/ffffff?text=U";
+        }
+    }
 }

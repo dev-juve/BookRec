@@ -5,7 +5,7 @@ namespace BookRec.Models;
 public class User
 {
     [Key]
-    public string Id { get; set; } = string.Empty; // We will use the GitHub Provider ID here
+    public string Id { get; set; } = string.Empty; 
 
     [Required]
     public string? Username { get; set; } = string.Empty;

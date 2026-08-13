@@ -4,7 +4,6 @@
 @using BookRec.Services
 @using BookRec.Components.Landing
 @inject BookService BookService
-@inject GoogleBooksApiService ApiService
 @inject NavigationManager Navigation
 
 <PageTitle>BookRec • Reimagining Book Discovery</PageTitle>
@@ -33,22 +32,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        recentBooks = await BookService.GetAllBooks();
-        await LoadBooksForCategory(currentSubject);
+        await BookService.SeedLocalBooksAsync();
+
+        recentBooks = await BookService.GetTrendingLocalBooksAsync();
     }
 
     private void HandleSubjectSelected(string categoryQuery)
     {
         Navigation.NavigateTo($"/books?q={Uri.EscapeDataString(categoryQuery)}");
-    }
-
-    private async Task LoadBooksForCategory(string categoryQuery)
-    {
-        var apiBooks = await ApiService.SearchBooksAsync(categoryQuery, 1);
-        if (apiBooks != null && apiBooks.Any())
-        {
-            recentBooks = apiBooks.ToList();
-            StateHasChanged();
-        }
     }
 }

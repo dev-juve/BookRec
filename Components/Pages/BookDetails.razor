@@ -1,0 +1,365 @@
+@page "/book/{Id}"
+@rendermode InteractiveServer
+@using BookRec.Models
+@using BookRec.Data
+@using BookRec.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject BookRec.Services.GoogleBooksApiService ApiService
+@inject BookRec.Services.BookService BookService
+@inject AppDbContext DbContext
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<link rel="stylesheet" href="css/folio-theme.css" />
+
+<PageTitle>@(book?.Title ?? "Loading...") • BookRec</PageTitle>
+
+@if (isLoading)
+{
+    <div class="container py-5 text-center" style="min-height: 80vh;">
+        <div class="spinner-border text-secondary mt-5" role="status"></div>
+    </div>
+}
+else if (book == null)
+{
+    <div class="container py-5 text-center" style="min-height: 80vh;">
+        <h3 class="font-serif fw-bold text-dark mt-5">Book not found.</h3>
+        <a href="/books" class="btn btn-outline-dark rounded-pill mt-3 px-4">Back to Catalog</a>
+    </div>
+}
+else
+{
+    <div class="container py-5 max-w-1200" style="min-height: 85vh;">
+        <a href="/books" class="text-decoration-none text-muted small mb-4 d-inline-flex align-items-center gap-2 transition-link">
+            <i class="bi bi-arrow-left"></i> Back to Catalog
+        </a>
+
+        <div class="row gx-5 mb-5">
+            <div class="col-12 col-md-4 col-lg-3 mb-4 mb-md-0 text-center text-md-start">
+                <img src="@book.CoverImageUrl" alt="@book.Title" class="img-fluid rounded-4 shadow-sm w-100" style="max-width: 300px; object-fit: cover;" />
+            </div>
+            
+            <div class="col-12 col-md-8 col-lg-9 d-flex flex-column justify-content-center">
+                <!-- Title & Add to To-Read Button Header -->
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-3">
+                    <div>
+                        <h1 class="display-5 font-serif fw-bold text-dark mb-1">@book.Title</h1>
+                        <h4 class="text-muted font-serif fst-italic m-0">by @book.Author</h4>
+                    </div>
+                    <button class="btn btn-outline-dark rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm flex-shrink-0 transition-hover" @onclick="AddToReadingList">
+                        <i class="bi bi-plus-lg"></i> Add to To-Read
+                    </button>
+                </div>
+                
+                @if (averageRating > 0)
+                {
+                    <div class="d-flex align-items-center gap-2 text-warning fs-5 mb-4">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="bi @(i <= Math.Round(averageRating) ? "bi-star-fill" : "bi-star")"></i>
+                        }
+                        <span class="text-dark fw-bold ms-2 fs-6">@Math.Round(averageRating, 1) / 5.0</span>
+                        <span class="text-muted fs-6 fw-normal ms-1">(@totalReviewCount review@(totalReviewCount == 1 ? "" : "s"))</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted small mb-4 fst-italic">No ratings yet</div>
+                }
+
+                <p class="lead" style="font-size: 1.1rem; line-height: 1.8; color: var(--folio-slate);">
+                    @((MarkupString)book.Description)
+                </p>
+            </div>
+        </div>
+
+        <hr style="border-color: var(--folio-sand, #e8e2d5);" class="my-5 opacity-50" />
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="font-serif fw-bold m-0 text-dark">Community Reviews</h3>
+                    <button class="btn rounded-pill px-4 py-2 text-white shadow-sm" style="background-color: var(--folio-terracotta, #b35a42);" @onclick="HandleReviewClick">
+                        Leave a Review
+                    </button>
+                </div>
+
+                @if (showReviewLoginPrompt)
+                {
+                    <div class="mb-4 fade-in">
+                        <span class="badge bg-warning text-dark border px-3 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2" style="font-weight: 500; font-size: 0.9rem;">
+                            <i class="bi bi-exclamation-triangle"></i> Please <a href="/signin" class="text-dark fw-bold text-decoration-underline">sign in</a> to leave a review.
+                        </span>
+                    </div>
+                }
+
+                @if (!recentReviews.Any())
+                {
+                    <div class="text-center p-5 bg-white rounded-4 border shadow-sm" style="border-color: var(--folio-sand, #e8e2d5) !important;">
+                        <i class="bi bi-chat-square-text text-muted fs-1 mb-3 d-block"></i>
+                        <p class="text-muted m-0">No reviews yet. Be the first to share your thoughts!</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-4">
+                        @foreach (var review in recentReviews)
+                        {
+                            <div class="p-4 bg-white rounded-4 border shadow-sm" style="border-color: var(--folio-sand, #e8e2d5) !important;">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <img src="@(review.User?.AvatarUrl ?? "https://via.placeholder.com/150/6c757d/ffffff?text=U")" alt="@review.User?.Username" class="rounded-circle border" style="width: 45px; height: 45px; object-fit: cover;" />
+                                    
+                                    <div>
+                                        <h6 class="m-0 fw-bold text-dark">@(review.User?.Username ?? "Unknown User")</h6>
+                                        <div class="text-warning small d-flex gap-1 mt-1">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi @(i <= review.StarRating ? "bi-star-fill" : "bi-star")"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    <small class="text-muted ms-auto">@review.DateSubmitted.ToString("MMM dd, yyyy")</small>
+                                </div>
+                                <p class="m-0" style="color: var(--folio-slate); line-height: 1.6;">@review.Comment</p>
+                            </div>
+                        }
+                    </div>
+
+                    @if (totalPages > 1)
+                    {
+                        <div class="d-flex align-items-center justify-content-center gap-3 mt-5 pt-3">
+                            <button class="btn btn-outline-dark rounded-pill px-4 btn-sm d-flex align-items-center gap-1" 
+                                    disabled="@(currentReviewPage <= 1)" 
+                                    @onclick="PreviousReviewPage">
+                                <i class="bi bi-arrow-left"></i> Previous
+                            </button>
+                            
+                            <span class="fw-bold px-3 py-1 rounded-circle bg-white border small shadow-sm">Page @currentReviewPage of @totalPages</span>
+                            
+                            <button class="btn btn-outline-dark rounded-pill px-4 btn-sm d-flex align-items-center gap-1" 
+                                    disabled="@(currentReviewPage >= totalPages)"
+                                    @onclick="NextReviewPage">
+                                Next <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (addMessage != null) 
+{ 
+    <!-- global floating toast notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-4" style="z-index: 1055;">
+        <div class="toast show align-items-center text-white bg-success border-0 shadow-lg fade-in" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex p-1">
+                <div class="toast-body d-flex align-items-center gap-2 fw-medium">
+                    <i class="bi bi-check-circle-fill fs-5"></i> 
+                    @addMessage
+                </div>
+                <button type="button" class="btn-close btn-close-white me-3 m-auto" @onclick="() => addMessage = null" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showReviewModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title font-serif fw-bold text-dark">Review "@book?.Title"</h5>
+                    <button type="button" class="btn-close" @onclick="() => showReviewModal = false"></button>
+                </div>
+                <div class="modal-body py-4">
+                    
+                    <div class="mb-4 text-center">
+                        <label class="form-label text-muted small d-block mb-2 text-uppercase tracking-widest">Your Rating</label>
+                        <div class="d-flex justify-content-center gap-2 text-warning fs-3">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                var starValue = i;
+                                <i class="bi @(newReviewRating >= starValue ? "bi-star-fill" : "bi-star") cursor-pointer transition-hover" 
+                                   @onclick="() => newReviewRating = starValue"></i>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-dark">Your Thoughts</label>
+                        <textarea class="form-control bg-light rounded-3" rows="5" maxlength="500" @bind="newReviewComment" @bind:event="oninput"
+                                  placeholder="What did you think of this book? (Max 500 characters)"></textarea>
+                        <div class="text-end small text-muted mt-2 font-monospace">
+                            @(newReviewComment?.Length ?? 0) / 500
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-medium" @onclick="() => showReviewModal = false">Cancel</button>
+                    <button type="button" class="btn text-white rounded-pill px-4 fw-medium" style="background-color: var(--folio-terracotta, #b35a42);" 
+                            disabled="@(newReviewRating == 0 || string.IsNullOrWhiteSpace(newReviewComment))"
+                            @onclick="SubmitReview">
+                        Publish Review
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .transition-hover:hover { transform: translateY(-2px); }
+    .tracking-widest { letter-spacing: 0.1em; }
+    .transition-link { transition: color 0.2s ease, transform 0.2s ease; }
+    .transition-link:hover { color: var(--folio-terracotta, #b35a42) !important; transform: translateX(-4px); }
+</style>
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    private Book? book;
+    private bool isLoading = true;
+    private List<Review> recentReviews = new();
+    private double averageRating = 0;
+    private int totalReviewCount = 0;
+    private string? addMessage;
+
+    // Pagination variables
+    private int currentReviewPage = 1;
+    private int pageSize = 5;
+    private int totalPages = 1;
+
+    private bool showReviewModal = false;
+    private bool showReviewLoginPrompt = false;
+    private int newReviewRating = 0;
+    private string newReviewComment = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        book = await ApiService.GetBookByIdAsync(Id);
+        await LoadReviewsAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadReviewsAsync()
+    {
+        var allReviews = await DbContext.Reviews
+            .Include(r => r.User) 
+            .Where(r => r.BookId == Id)
+            .OrderByDescending(r => r.DateSubmitted)
+            .ToListAsync();
+            
+        totalReviewCount = allReviews.Count;
+        totalPages = (int)Math.Ceiling(totalReviewCount / (double)pageSize);
+        if (totalPages < 1) totalPages = 1;
+
+        if (allReviews.Any())
+        {
+            averageRating = allReviews.Average(r => r.StarRating);
+        }
+        else
+        {
+            averageRating = 0;
+        }
+
+        recentReviews = allReviews
+            .Skip((currentReviewPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private async Task NextReviewPage()
+    {
+        if (currentReviewPage < totalPages)
+        {
+            currentReviewPage++;
+            await LoadReviewsAsync();
+        }
+    }
+
+    private async Task PreviousReviewPage()
+    {
+        if (currentReviewPage > 1)
+        {
+            currentReviewPage--;
+            await LoadReviewsAsync();
+        }
+    }
+
+    private async Task AddToReadingList()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userId) && book != null)
+        {
+            await BookService.AddToReadList(book, userId);
+            
+            addMessage = $"\"{book.Title}\" was added to your To-Read list.";
+            StateHasChanged();
+
+            await Task.Delay(5000);
+
+            addMessage = null;
+            StateHasChanged();
+        }
+        else
+        {
+            Navigation.NavigateTo("/signin", forceLoad: true);
+        }
+    }
+
+    private async Task HandleReviewClick()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            showReviewLoginPrompt = false;
+            newReviewRating = 0;
+            newReviewComment = "";
+            showReviewModal = true;
+        }
+        else
+        {
+            showReviewLoginPrompt = true;
+        }
+    }
+
+    private async Task SubmitReview()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var review = new Review
+            {
+                BookId = Id,
+                UserId = userId, 
+                StarRating = newReviewRating,
+                Comment = newReviewComment,
+                DateSubmitted = DateTime.UtcNow
+            };
+
+            DbContext.Reviews.Add(review);
+            await DbContext.SaveChangesAsync();
+
+            showReviewModal = false;
+            currentReviewPage = 1;
+            await LoadReviewsAsync(); 
+        }
+    }
+}
