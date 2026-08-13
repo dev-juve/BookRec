@@ -1,0 +1,119 @@
+@page "/editorial"
+<link rel="stylesheet" href="css/folio-theme.css" />
+
+<PageTitle>The BookRec Manifesto • Reimagining Book Discovery</PageTitle>
+
+<div class="container py-5 max-w-1200">
+    <!-- back to nav -->
+    <a href="/" class="text-decoration-none text-muted small mb-4 d-inline-flex align-items-center gap-2 transition-link">
+        <i class="bi bi-arrow-left"></i> Back to Catalog
+    </a>
+
+    <div class="row mt-3">
+        <div class="col-12 col-lg-10 col-xl-8">
+            
+            <!-- art header -->
+            <header class="mb-5">
+                <span class="text-uppercase mb-3 d-block fw-semibold" style="color: var(--folio-terracotta, #b35a42); font-size: 0.75rem; letter-spacing: 0.15em;">
+                    The BookRec Manifesto
+                </span>
+                <h1 class="display-4 font-serif fw-bold text-dark mb-4" style="line-height: 1.15;">
+                    In Defense of Intentional Reading in an Algorithmic Age
+                </h1>
+                <p class="lead text-muted font-serif fst-italic mb-4" style="font-size: 1.25rem;">
+                    Why we built a sanctuary for readers who value depth, curation, and genuine discovery over endless scrolling.
+                </p>
+                
+                <div class="d-flex align-items-center gap-2 small text-muted font-monospace">
+                    <span>By the BookRec Editorial Team</span>
+                    <span>•</span>
+                    <span>Reading Time: 3 mins</span>
+                </div>
+            </header>
+
+            <hr class="my-5 opacity-25" style="border-color: var(--folio-sand, #e8e2d5);" />
+
+            <!-- art body -->
+            <article class="font-serif" style="font-size: 1.125rem; line-height: 1.8; color: var(--folio-slate, #4a4a4a);">
+                <p class="mb-4">
+                    <span class="drop-cap">W</span>e live in an era overwhelmed by content, yet starved for true insight. Modern platforms push books through automated engagement engines designed for speed rather than substance. The result? Great literature and transformative non-fiction get drowned out by whatever happens to trend for forty-eight hours.
+                </p>
+
+                <h3 class="fw-bold text-dark mt-5 mb-3 font-serif fs-4">Why BookRec Exists</h3>
+                <p class="mb-4">
+                    <strong>BookRec</strong> was created out of a simple conviction: recommendation systems should serve the reader, not an ad engine. We believe that discovering your next favorite book should feel like a recommendation from a trusted mentor or an insightful friend—intentional, relevant, and elevated.
+                </p>
+
+                <blockquote class="blockquote my-5 p-4 bg-light border-start border-4 rounded-3" style="border-color: var(--folio-terracotta, #b35a42) !important;">
+                    <p class="mb-0 fst-italic text-dark fs-5" style="line-height: 1.6;">
+                        "A truly great book recommendation doesn't just fill time—it shapes how you think, code, build, and navigate the world."
+                    </p>
+                </blockquote>
+
+                <h3 class="fw-bold text-dark mt-5 mb-3 font-serif fs-4">What Happens When You Join</h3>
+                <p class="mb-4">
+                    By creating an account with BookRec, you step into a curated reading ecosystem built for serious readers, software craftspeople, and thinkers:
+                </p>
+
+                <ul class="list-unstyled my-4">
+                    <li class="d-flex gap-3 mb-3">
+                        <i class="bi bi-check-circle-fill text-success fs-5 flex-shrink-0 mt-1"></i>
+                        <div><strong>Personal Dashboard:</strong> Organize your personal library into To-Read, Reading, and Completed collections.</div>
+                    </li>
+                    <li class="d-flex gap-3 mb-3">
+                        <i class="bi bi-check-circle-fill text-success fs-5 flex-shrink-0 mt-1"></i>
+                        <div><strong>Tailored Curation:</strong> Filter across handpicked streams—from deep technology and software engineering to philosophy and high-caliber fiction.</div>
+                    </li>
+                    <li class="d-flex gap-3 mb-3">
+                        <i class="bi bi-check-circle-fill text-success fs-5 flex-shrink-0 mt-1"></i>
+                        <div><strong>Feedback Engine:</strong> Shape future catalog streams by rating recommendations and contributing to community discovery.</div>
+                    </li>
+                </ul>
+
+                <p class="mb-4">
+                    Whether you are diving into backend architecture, exploring self-development classics, or looking for your next fiction escape, BookRec provides the clarity you need to spend less time searching and more time reading.
+                </p>
+            </article>
+
+            <hr class="my-5 opacity-25" style="border-color: var(--folio-sand, #e8e2d5);" />
+            
+            <!-- cta at the bottom -->
+            <div class="p-4 p-md-5 rounded-4 mb-5" style="background-color: #fdfbf7; border: 1px solid var(--folio-sand, #e8e2d5);">
+                <h3 class="font-serif fw-bold mb-2 text-dark fs-4">Ready to elevate your reading list?</h3>
+                <p class="text-muted mb-4" style="max-width: 500px;">
+                    Join over 12,000 deep readers and technologists. Create your account in seconds with GitHub and start curating today.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/signin" class="btn btn-lg rounded-pill px-4 py-2 text-white fw-semibold shadow-sm text-decoration-none" style="background-color: var(--folio-terracotta, #b35a42); border: none;">
+                        Join the Circle (Sign In) <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                    <a href="/books" class="btn btn-lg btn-outline-dark rounded-pill px-4 py-2 fw-semibold text-decoration-none">
+                        Explore Catalog
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .drop-cap {
+        float: left;
+        font-size: 3.5rem;
+        line-height: 0.8;
+        padding-top: 6px;
+        padding-right: 10px;
+        font-weight: bold;
+        color: var(--folio-terracotta, #b35a42);
+    }
+
+    .transition-link {
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .transition-link:hover {
+        color: var(--folio-terracotta, #b35a42) !important;
+        transform: translateX(-4px);
+    }
+</style>
