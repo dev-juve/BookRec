@@ -13,13 +13,14 @@
     /* fonts */
     --font-serif: 'Newsreader', Georgia, serif;
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
 }
 
 body {
     background-color: var(--folio-cream);
     color: var(--folio-black);
     font-family: var(--font-sans);
-    margin: 0;
+    margin: 1%;
     padding: 0;
     -webkit-font-smoothing: antialiased;
 }
@@ -190,13 +191,12 @@ h1, h2, h3, h4, .font-serif {
     }
 
     .page-number {
-        margin: 0 5px 0 5px;
         font-weight: 700;
     }
 
-    #reading-list,
-    #reviews {
-        padding: 10px;
+    #reading-list {
+        /* margin: 0 20px 0 0; */
+        padding: 0 20px 0 10px;
         text-align: center;
     }
 
@@ -206,4 +206,15 @@ h1, h2, h3, h4, .font-serif {
 
     #dashboard-signin {
         margin: 10%;
+    }
+
+    .alert-success {
+        text-align: center;
+        color: var(--folio-terracotta);
+        font-weight: 700;
+    }
+
+    #title {
+        text-align: left;
+        padding: 5px;
     }

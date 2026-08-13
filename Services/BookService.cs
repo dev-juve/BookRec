@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using BookRec.Models;
 using BookRec.Data;
 
@@ -8,7 +9,7 @@ public class BookService
 {
     private readonly AppDbContext _context;
     private readonly List<Book> _books = new();
-    private readonly List<Book> _userToReadList = new();
+    // **** Remove this --> private readonly List<Book> _userToReadList = new();
     private readonly List<Book> _userSuggestions = new();
 
     public BookService(AppDbContext context)
@@ -19,7 +20,16 @@ public class BookService
 
 
     // search/query
-    public List<Book> GetAllBooks() => _books;
+    public async Task<List<Book>> GetAllBooks()
+    {
+        return await _context.Books.ToListAsync();
+    }
+
+
+    public async Task<int> GetBookCount()
+{
+    return await _context.Books.CountAsync();
+}
 
     public List<Book> FilterBooks(BookCategory? category, bool? onlyBestsellers, string? searchString)
     {
@@ -38,51 +48,66 @@ public class BookService
         return query.ToList();
     }
 
-    // user book list
-    public List<Book> GetToReadList()
+    public async Task<List<UserBook>> GetToReadList(string userId)
     {
-        return _userToReadList;
-        
+        return await _context.UserBooks
+            .Where(ub => ub.UserId == userId)
+            .OrderByDescending(ub => ub.AddedAt)
+            .ToListAsync();
     }
+
     public async Task AddToReadList(Book book, string userId)
     {
-        var UserBook = new UserBook
+        var existing = await _context.UserBooks
+            .AnyAsync(ub =>
+                ub.UserId == userId &&
+                ub.GoogleBookId == book.GoogleBookId);
+
+        if (!existing)
         {
-            UserId = userId,
-            GoogleBookId = book.GoogleBookId
-        };
+            var userBook = new UserBook
+            {
+                UserId = userId,
+                GoogleBookId = book.GoogleBookId,
+                Title = book.Title,
+                Author = book.Author,
+                CoverImageUrl = book.CoverImageUrl,
+                Status = "To-Read",
+                AddedAt = DateTime.UtcNow
+            };
 
-        _context.UserBooks.Add(UserBook);
-        await _context.SaveChangesAsync();
-    }
-    public async Task AddToReadList(Book book, string userId) 
-{
-    var newSavedBook = new UserToReadBook
-    {
-        UserId = userId, // Ensure we are saving the relational user ID
-        GoogleBookId = book.Id.ToString(),
-        Title = book.Title,
-        Author = book.Author,
-        Status = "To-Read",
-        AddedAt = DateTime.UtcNow
-        // Note: CoverImageUrl is completely removed here!
-    };
+            _context.UserBooks.Add(userBook);
+            await _context.SaveChangesAsync();
+        }
 
-    // Use the new UserToReadBooks DbSet
-    _dbContext.UserToReadBooks.Add(newSavedBook); 
-    await _dbContext.SaveChangesAsync();
-}
-
-    public void RemoveFromToReadList(int bookId)
-    {
-        var book = _userToReadList.FirstOrDefault(b => b.Id == bookId);
-        if (book != null) _userToReadList.Remove(book);
     }
 
-    public void UpdateToReadList(int bookId, string readStatus)
+    public async Task RemoveFromReadList(int userBookId, string userId)
     {
-        var book = _userToReadList.FirstOrDefault(b => b.Id == bookId);
-        // if (book != null) book.Status = readStatus;
+        var userBook = await _context.UserBooks
+            .FirstOrDefaultAsync(ub =>
+            ub.Id == userBookId &&
+            ub.UserId == userId);
+
+        if (userBook != null)
+        {
+            _context.UserBooks.Remove(userBook);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task UpdateReadList(int userBookId, string userId, string readStatus)
+    {
+        var userBook = await _context.UserBooks
+            .FirstOrDefaultAsync(ub =>
+            ub.Id == userBookId &&
+            ub.UserId == userId);
+
+        if (userBook != null)
+        {
+            userBook.Status = readStatus;
+            await _context.SaveChangesAsync();
+        }
     }
 
     // review

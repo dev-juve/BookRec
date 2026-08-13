@@ -7,6 +7,8 @@
 @inject BookService BookService
 @inject NavigationManager Navigation
 @inject BookRec.Data.AppDbContext DbContext
+@inject UserService UserService
+
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
@@ -38,8 +40,14 @@
                 </div>
             </aside>
 
+
             <!-- main catalog area -->
             <main class="col-12 col-lg-9">
+            @if (addMessage != null) 
+            { 
+                <div class="alert alert-success mb-4"> 
+                    @addMessage </div> 
+            }
                 @if (isLoading)
                 {
                     <div class="row g-4">
@@ -71,7 +79,9 @@
                         @foreach (var book in showAllBooks)
                         {
                             <div class="col d-flex align-items-stretch" style="min-width: 0;">
-                                <BookCard Book="book" OnAddToToReadList="BookService.AddToReadList" />
+                                @* <BookCard Book="book" OnAddToToReadList="AddToReadingList" /> *@
+                                <BookCard Book="book" OnAddToToReadList="HandleAddToReadingList" />
+
                             </div>
                         }
                     </div>
@@ -213,6 +223,31 @@
             CurrentPage--;
             await LoadCatalog();
         }
+    }
+
+    private async Task AddToReadingList(Book book)
+    {
+        await UserService.GetUserAsync();
+
+        if (UserService.Id != null)
+        {
+            await BookService.AddToReadList(book, UserService.Id);
+        }
+    }
+
+    private string? addMessage;
+
+    private async Task HandleAddToReadingList(Book book)
+    {
+        await BookService.AddToReadList(book, UserService.Id);
+        
+        addMessage = $"\"{book.Title}\" was added to your To-Read list.";
+            StateHasChanged();
+
+            await Task.Delay(5000);
+
+            addMessage = null;
+            StateHasChanged();
     }
 
     private bool isOffcanvasOpen = false;

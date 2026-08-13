@@ -6,113 +6,143 @@
 @using BookRec.Services
 @using BookRec.Models
 
+
 @inject UserService userService
 @inject BookService BookService
 
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
-    <AuthorizeView>
-        <Authorized>
-            <div class="d-flex align-items-center gap-3">
-                <h1 id="user-profile-header" class="display-5 font-serif m-0">User Profile</h1>
-            </div>
+<AuthorizeView>
+    <Authorized>
+        <div class="d-flex align-items-center gap-3">
+            <h1 id="user-profile-header" class="display-5 font-serif m-0">User Profile</h1>
+        </div>
 
-            <section id="user-dashboard" class="folio-section" style="background-color: var(--folio-cream);">
-                <div class="row g-4">                    
-                    <div id="profile" class="col-md-2">
-                        <span class="fw-semibold small"><h2>@userService.Name</h2></span>
-                        <p>@userService.UserName</p>
-                        <p>@userService.Email</p>
-                        <p>@userService.AvatarUrl</p>
-                    </div>
-                    <div id="reading-list" class="col-md-5">
-                        <h3>Reading List</h3>
-                        @if (showReadingList?.Count > 0)
-                        {
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Cover</th>
-                                        <th>Title</th>
-                                        <th>Author</th>                                        
-                                        <th>Status</th>                                      
-                                        <th>Remove</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var book in showReadingList)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <img src="@book.CoverImageUrl" 
-                                                alt="Book.Title" 
-                                                style="width: 40px; height: 55px; object-fit: cover;"/>
-                                            </td>
-                                            <td>
-                                                @book.Title
-                                            </td>
-                                            <td>
-                                                @book.Author
-                                            </td>
-                                            @* <td>
-                                                @book.Status
-                                            </td> *@
-                                            <td>
-                                                <button @onclick="() => RemoveFromReadingList(book.Id)">✖</button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            <a href="/books" class="btn-terracotta">Return to Catalog</a>
-                        }
-                        else
-                        {
-                            <p>There are no books in your reading list</p>
-                            <a href="/books" class="btn-terracotta">Go to the Catalog</a>
-                        }
-                       
-                    </div>
-                    <div id="reviews" class="col-md-5">
-                        <h3>Recommendations</h3>
-                    </div>
+        <section id="user-dashboard" class="folio-section" style="background-color: var(--folio-cream);">
+            <div class="row g-4">
+                <div id="profile" class="col-md-2">
+                    <span class="fw-semibold small">
+                        <h2>@userService.Name</h2>
+                    </span>
+                    <p>@userService.UserName</p>
+                    <p>@userService.Email</p>
+                    <p>@userService.AvatarUrl</p>
                 </div>
-            </section>
-        </Authorized>
+                <div id="reading-list" class="col-md-10">
+                    <h3>Reading List</h3>
+                    @if (showReadingList?.Count > 0)
+                    {
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cover</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Status</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var book in showReadingList)
+                                {
+                                    <tr @key="book.Id">
+                                        <td>
+                                            <img src="@book.CoverImageUrl" alt="@book.Title"
+                                                 style="width: 40px; height: 55px; object-fit: cover;" />
+                                        </td>
+                                        <td id="title">
+                                            @book.Title
+                                        </td>
+                                        <td>
+                                            @book.Author
+                                        </td>
+                                        <td>
+                                            <select value="@book.Status"
+                                                    @onchange="async e => await UpdateReadStatus(book.Id, e.Value?.ToString())">
+                                                <option value="To-Read">To-Read</option>
+                                                <option value="Reading">Reading</option>
+                                                <option value="Completed">Completed</option>
 
-        <NotAuthorized>
-            <div id="dashboard-signin" class="d-flex flex-column justify-content-center align-items-center">
-                <h3>Please sign in to access your dashboard</h3>
-                <a href="/signin" class="btn-dark-solid">Sign In with GitHub</a>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button @onclick="() => RemoveFromReadingList(book.Id)">✖</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <a href="/books" class="btn-terracotta">Return to Catalog</a>
+                    }
+                    else
+                    {
+                        <p>There are no books in your reading list</p>
+                        <a href="/books" class="btn-terracotta">Go to the Catalog</a>
+                    }
+
+                </div>
             </div>
-        </NotAuthorized>
-    </AuthorizeView>
+        </section>
+    </Authorized>
 
-    @code {
-        private List<Book>? showReadingList;
+    <NotAuthorized>
+        <div id="dashboard-signin" class="d-flex flex-column justify-content-center align-items-center">
+            <h3>Please sign in to access your dashboard</h3>
+            <a href="/signin" class="btn-dark-solid">Sign In with GitHub</a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
-        protected override async Task OnInitializedAsync()
+@code {
+    private List<UserBook>? showReadingList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await userService.GetUserAsync();
+        await ShowReadingList();
+    }
+    protected async Task ShowReadingList()
+    {
+        await userService.GetUserAsync();
+
+        if (userService.Id != null)
         {
-            await userService.GetUserAsync();
-            await ShowReadingList();
+            showReadingList = await BookService.GetToReadList(userService.Id);
         }
-        protected async Task ShowReadingList()
-        {
-            showReadingList = BookService.GetToReadList();
-        }
+    }
 
-        protected async Task AddToReadingList(Book book)
+    protected async Task AddToReadingList(Book book)
+    {
+        if (userService.Id != null)
         {
-            BookService.AddToReadList(book);
-            await ShowReadingList();
-        }
-
-        protected async Task RemoveFromReadingList(int id)
-        {
-            BookService.RemoveFromToReadList(id);
+            await BookService.AddToReadList(book, userService.Id);
             await ShowReadingList();
         }
     }
+
+    protected async Task RemoveFromReadingList(int id)
+    {
+
+        if (userService.Id != null)
+
+            await BookService.RemoveFromReadList(id, userService.Id);
+        await ShowReadingList();
+    }
+
+    protected async Task UpdateReadStatus(int userBookId, string? status)
+    {
+
+        if (userService.Id != null && status != null)
+        {
+            await BookService.UpdateReadList(
+                userBookId,
+                userService.Id,
+                status);
+
+            await ShowReadingList();
+        }
+    }
+}
 
     

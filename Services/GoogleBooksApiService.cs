@@ -13,7 +13,7 @@ public class GoogleBooksApiService
     {
         _httpClient = httpClient;
 
-        _apiKey = Environment.GetEnvironmentVariable("GOOGLE_BOOKS_API_KEY") 
+        _apiKey = Environment.GetEnvironmentVariable("GOOGLE_BOOKS_API_KEY")
             ?? throw new InvalidOperationException("GOOGLE_BOOKS_API_KEY is missing from environment/env file.");
 
         _httpClient.Timeout = TimeSpan.FromSeconds(15);
@@ -45,13 +45,13 @@ public class GoogleBooksApiService
             if (result?.Items == null || !result.Items.Any())
                 return GetFallbackBooks();
 
-            return result.Items.Select((item, index) => 
+            return result.Items.Select((item, index) =>
             {
                 // try to get the first category from Google Books
                 var googleCategory = item.VolumeInfo?.Categories?.FirstOrDefault();
-                
-                BookCategory mappedCategory = BookCategory.SelfDevelopment; 
-                
+
+                BookCategory mappedCategory = BookCategory.SelfDevelopment;
+
                 if (!string.IsNullOrEmpty(googleCategory))
                 {
                     // remove spaces
@@ -67,9 +67,9 @@ public class GoogleBooksApiService
                     Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
                     Description = item.VolumeInfo?.Description ?? "No description available for this volume.",
                     CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?.Replace("http://", "https://") ?? "https://via.placeholder.com/150x220?text=No+Cover",
-                    
-                    DisplayCategory = googleCategory ?? mappedCategory.ToString(), 
-                    
+
+                    DisplayCategory = googleCategory ?? mappedCategory.ToString(),
+
                     IsBestseller = index % 3 == 0
                 };
             }).ToList();
@@ -120,7 +120,7 @@ public class GoogleBookItem
 {
     [JsonPropertyName("id")]
     public string? Id { get; set; }
-    
+
     [JsonPropertyName("volumeInfo")]
     public VolumeInfo? VolumeInfo { get; set; }
 
@@ -142,7 +142,7 @@ public class VolumeInfo
 
     [JsonPropertyName("imageLinks")]
     public ImageLinks? ImageLinks { get; set; }
-    
+
     [JsonPropertyName("categories")]
     public List<string>? Categories { get; set; }
 }
