@@ -13,13 +13,14 @@
     /* fonts */
     --font-serif: 'Newsreader', Georgia, serif;
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
 }
 
 body {
     background-color: var(--folio-cream);
     color: var(--folio-black);
     font-family: var(--font-sans);
-    margin: 0;
+    margin: 1%;
     padding: 0;
     -webkit-font-smoothing: antialiased;
 }
@@ -206,4 +207,10 @@ h1, h2, h3, h4, .font-serif {
 
     #dashboard-signin {
         margin: 10%;
+    }
+
+    .alert-success {
+        text-align: center;
+        color: var(--folio-terracotta);
+        font-weight: 700;
     }

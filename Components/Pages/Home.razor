@@ -33,7 +33,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        recentBooks = BookService.GetAllBooks();
+        recentBooks = await BookService.GetAllBooks();
         await LoadBooksForCategory(currentSubject);
     }
 
