@@ -16,7 +16,7 @@ public class GoogleBooksApiService
         _apiKey = Environment.GetEnvironmentVariable("GOOGLE_BOOKS_API_KEY") 
             ?? throw new InvalidOperationException("GOOGLE_BOOKS_API_KEY is missing from environment/env file.");
 
-        _httpClient.Timeout = TimeSpan.FromSeconds(8);
+        _httpClient.Timeout = TimeSpan.FromSeconds(15);
 
         if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
         {
@@ -84,8 +84,28 @@ public class GoogleBooksApiService
     {
         return new List<Book>
         {
-            new Book { Id = 1, Title = "Atomic Habits", Author = "James Clear", Category = BookCategory.SelfDevelopment, Publisher = "Penguin", IsBestseller = true, Description = "An easy & proven way to build good habits & break bad ones." },
-            new Book { Id = 2, Title = "Clean Code", Author = "Robert C. Martin", Category = BookCategory.Programming, Publisher = "Prentice Hall", IsBestseller = true, Description = "A handbook of agile software craftsmanship." }
+            new Book 
+            { 
+                Id = 1, 
+                Title = "Atomic Habits", 
+                Author = "James Clear", 
+                Category = BookCategory.SelfDevelopment, 
+                Publisher = "Penguin", 
+                IsBestseller = true, 
+                Description = "An easy & proven way to build good habits & break bad ones.",
+                CoverImageUrl = "/images/fallback/atomic-habits.jpg"
+            },
+            new Book 
+            { 
+                Id = 2, 
+                Title = "Clean Code", 
+                Author = "Robert C. Martin", 
+                Category = BookCategory.Programming, 
+                Publisher = "Prentice Hall", 
+                IsBestseller = true, 
+                Description = "A handbook of agile software craftsmanship.",
+                CoverImageUrl = "/images/fallback/clean-code.jpg" 
+            }
         };
     }
 }
