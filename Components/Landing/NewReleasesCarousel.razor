@@ -1,6 +1,6 @@
 @using BookRec.Models
 @using BookRec.Services
-@inject BookService BookService
+@inject ReadingListService ReadingListService
 
 <section id="new-releases" class="folio-section" style="background-color: var(--folio-cream);">
     <div class="container">
@@ -9,8 +9,11 @@
                 <span class="eyebrow-tag">FRESH IMPRESSIONS</span>
                 <h2 class="display-5 font-serif m-0">Newly Released & Trending</h2>
             </div>
-            <a href="/books" class="text-decoration-none fw-medium d-none d-sm-inline-flex align-items-center gap-1" style="color: var(--folio-terracotta);">
-                View Full Catalog <i class="bi bi-arrow-right"></i>
+
+            <a href="/books" class="text-decoration-none fw-medium d-none d-sm-inline-flex align-items-center gap-1"
+               style="color: var(--folio-terracotta);">
+                View Full Catalog
+                <i class="bi bi-arrow-right"></i>
             </a>
         </div>
 
@@ -19,27 +22,40 @@
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                     <div class="folio-card h-100 d-flex flex-column justify-content-between p-3 bg-white">
-                        
+
                         <div>
-                            <div class="book-cover-wrapper rounded p-3 text-center mb-3 d-flex align-items-center justify-content-center">
-                                <img src="@book.CoverImageUrl" 
-                                     class="book-cover-img rounded" 
-                                     alt="@book.Title" />
+                            <div
+                                class="book-cover-wrapper rounded p-3 text-center mb-3 d-flex align-items-center justify-content-center">
+                                <img src="@book.CoverImageUrl" class="book-cover-img rounded" alt="@book.Title" />
                             </div>
 
-                            <span class="eyebrow-tag m-0 mb-1" style="font-size: 0.68rem;">@book.Category</span>
-                            <h6 class="font-serif fw-bold text-dark mb-1 text-truncate" title="@book.Title">@book.Title</h6>
-                            <small class="d-block mb-2" style="color: var(--folio-slate);">by @book.Author</small>
-                            <p class="small text-truncate-3 mb-0" style="color: var(--folio-slate); font-size: 0.825rem; line-height: 1.5;">
+                            <span class="eyebrow-tag m-0 mb-1" style="font-size: 0.68rem;">
+                                @book.Category
+                            </span>
+
+                            <h6 class="font-serif fw-bold text-dark mb-1 text-truncate" title="@book.Title">
+                                @book.Title
+                            </h6>
+
+                            <small class="d-block mb-2" style="color: var(--folio-slate);">
+                                by @book.Author
+                            </small>
+
+                            <p class="small text-truncate-3 mb-0"
+                               style="color: var(--folio-slate); font-size: 0.825rem; line-height: 1.5;">
                                 @book.Description
                             </p>
                         </div>
 
                         <div class="mt-3 pt-3 border-top d-grid" style="border-color: var(--folio-sand) !important;">
-                            <button class="btn-outline-sand btn-sm text-center py-2 d-flex align-items-center justify-content-center gap-1" 
-                                    @onclick="() => BookService.AddToToReadList(book)">
-                                <i class="bi bi-plus-lg"></i> Add to To-Read
+
+                            <button
+                                class="btn-outline-sand btn-sm text-center py-2 d-flex align-items-center justify-content-center gap-1"
+                                @onclick="() => AddToToReadList(book)">
+                                <i class="bi bi-plus-lg"></i>
+                                Add to To-Read
                             </button>
+
                         </div>
                     </div>
                 </div>
@@ -49,7 +65,13 @@
 </section>
 
 @code {
-    [Parameter] public List<Book> DisplayBooks { get; set; } = new();
+    [Parameter]
+    public List<Book> DisplayBooks { get; set; } = new();
+
+    private async Task AddToToReadList(Book book)
+    {
+        await ReadingListService.AddToToReadAsync(book);
+    }
 
     protected override void OnParametersSet()
     {
@@ -61,7 +83,7 @@
     .book-cover-wrapper {
         background: linear-gradient(145deg, #f3efe6, #faf8f5);
         height: 220px;
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
     }
 
     .book-cover-img {

@@ -21,6 +21,7 @@ builder.Services.AddSingleton<BookService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ReadingListService>();
 
 // retrieve github OAuth credentials from .env
 var githubClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID") 

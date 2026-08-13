@@ -1,20 +1,545 @@
 @page "/dashboard"
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using BookRec.Data
 @using BookRec.Services
-@inject UserService userService
+@using BookRec.Models
+@inject ReadingListService ReadingListService
+@inject AppDbContext Db
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-    <AuthorizeView>
-        <Authorized>
-            <div class="d-flex align-items-center gap-3">
-                <h1>UserProfile</h1>
-                <span class="fw-semibold small"><h2>@userService.Name</h2></span>
-            </div>
-        </Authorized>
+<AuthorizeView>
+    <Authorized>
+        @{
+            var username = context.User.FindFirst(ClaimTypes.Name)?.Value
+                ?? context.User.FindFirst("urn:github:login")?.Value
+                ?? "Reader";
+        }
 
-        <NotAuthorized>
-            <div class="d-flex align-items-center gap-3">
-                <a href="/signin" class="btn-dark-solid">Sign In with GitHub</a>
+        <div class="container py-5">
+
+            <!-- Dashboard Header -->
+            <div class="mb-5">
+                <span class="eyebrow-tag">Your Reading Space</span>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    <div>
+                        <h1 class="display-5 mb-2">Welcome, @username</h1>
+                        <p class="text-muted mb-0">
+                            Keep track of your books, reviews, and reading journey.
+                        </p>
+                    </div>
+
+                    <a href="/books" class="btn-terracotta">
+                        Browse Books
+                    </a>
+                </div>
             </div>
-        </NotAuthorized>
-    </AuthorizeView>
+
+            @if (loading)
+            {
+                <div class="folio-card text-center py-5">
+                    <p class="mb-0 text-muted">Loading your dashboard...</p>
+                </div>
+            }
+            else
+            {
+                <!-- Profile and Statistics -->
+                <div class="row g-4 mb-5">
+
+                    <!-- Profile Card -->
+                    <div class="col-lg-5">
+                        <div class="folio-card h-100">
+
+                            <span class="eyebrow-tag">Profile</span>
+
+                            <div class="d-flex align-items-center gap-4">
+
+                                @if (!string.IsNullOrWhiteSpace(avatarUrl))
+                                {
+                                    <img src="@avatarUrl" alt="@username" class="rounded-circle"
+                                         style="width: 90px; height: 90px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 90px; height: 90px; background-color: var(--folio-sand); font-family: var(--font-serif); font-size: 2rem;">
+                                        @username.Substring(0, 1).ToUpper()
+                                    </div>
+                                }
+
+                                <div>
+                                    <h2 class="h3 mb-1">@username</h2>
+
+                                    @if (!string.IsNullOrWhiteSpace(email))
+                                    {
+                                        <p class="text-muted mb-0">@email</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted mb-0">GitHub account</p>
+                                    }
+                                </div>
+
+                            </div>
+
+                            @if (createdAt.HasValue)
+                            {
+                                <div class="border-top mt-4 pt-3">
+                                    <small class="text-muted">
+                                        Member since @createdAt.Value.ToString("MMMM yyyy")
+                                    </small>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="col-lg-7">
+                        <div class="row g-4 h-100">
+
+                            <div class="col-sm-4">
+                                <div class="folio-card h-100">
+                                    <span class="eyebrow-tag">Reading List</span>
+                                    <h2 class="display-6 mb-1">@savedBooksCount</h2>
+                                    <p class="text-muted mb-0">Saved books</p>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="folio-card h-100">
+                                    <span class="eyebrow-tag">Reviews</span>
+                                    <h2 class="display-6 mb-1">@reviewsCount</h2>
+                                    <p class="text-muted mb-0">Reviews written</p>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="folio-card h-100">
+                                    <span class="eyebrow-tag">Searches</span>
+                                    <h2 class="display-6 mb-1">@searchesCount</h2>
+                                    <p class="text-muted mb-0">Searches made</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="folio-card">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
+                        <div>
+                            <span class="eyebrow-tag">Quick Actions</span>
+                            <h2 class="h3 mb-0">Continue your reading journey</h2>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/books" class="btn-terracotta">
+                                Browse Books
+                            </a>
+
+                            <a href="/" class="btn-outline-sand">
+                                Discover
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+        <!-- Reading Lists -->
+<div class="mt-5">
+
+    <div class="mb-4">
+        <span class="eyebrow-tag">Your Library</span>
+        <h2 class="display-6 mb-2">Reading List</h2>
+        <p class="text-muted mb-0">
+            Keep track of the books you want to read, are reading, and have completed.
+        </p>
+    </div>
+
+    <!-- To-Read -->
+    <div class="mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="h3 mb-0">To-Read</h3>
+            <span class="text-muted small">@toReadBooks.Count books</span>
+        </div>
+
+        @if (toReadBooks.Any())
+        {
+            <div class="row g-4">
+
+                @foreach (var book in toReadBooks)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+
+                        <div class="folio-card h-100 d-flex flex-column">
+
+                            <div class="book-cover-wrapper rounded p-3 text-center mb-3
+                                        d-flex align-items-center justify-content-center">
+
+                                @if (!string.IsNullOrWhiteSpace(book.CoverImageUrl))
+                                {
+                                    <img src="@book.CoverImageUrl"
+                                         class="book-cover-img rounded"
+                                         alt="@book.Title" />
+                                }
+                                else
+                                {
+                                    <div class="text-muted">
+                                        No cover
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="flex-grow-1">
+
+                                <h4 class="font-serif mb-1">
+                                    @book.Title
+                                </h4>
+
+                                <small class="d-block mb-3"
+                                       style="color: var(--folio-slate);">
+                                    by @book.Author
+                                </small>
+
+                            </div>
+
+                            <div class="border-top pt-3 mt-2"
+                                 style="border-color: var(--folio-sand) !important;">
+
+                                <select class="form-select form-select-sm"
+                                        value="@book.Status"
+                                        @onchange="async e =>
+                                            await ChangeBookStatus(
+                                                book.Id,
+                                                e.Value?.ToString())">
+
+                                    <option value="To-Read">To-Read</option>
+                                    <option value="Reading">Reading</option>
+                                    <option value="Completed">Completed</option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="folio-card text-center py-5">
+
+                <span class="eyebrow-tag">Your Reading List</span>
+
+                <h3 class="font-serif mb-2">
+                    Nothing here yet
+                </h3>
+
+                <p class="text-muted mb-4">
+                    Books you save for later will appear here.
+                </p>
+
+                <a href="/books" class="btn-terracotta">
+                    Browse Books
+                </a>
+
+            </div>
+        }
+
+    </div>
+
+
+    <!-- Reading -->
+    <div class="mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="h3 mb-0">Currently Reading</h3>
+            <span class="text-muted small">@readingBooks.Count books</span>
+        </div>
+
+        @if (readingBooks.Any())
+        {
+            <div class="row g-4">
+
+                @foreach (var book in readingBooks)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+
+                        <div class="folio-card h-100 d-flex flex-column">
+
+                            <div class="book-cover-wrapper rounded p-3 text-center mb-3
+                                        d-flex align-items-center justify-content-center">
+
+                                @if (!string.IsNullOrWhiteSpace(book.CoverImageUrl))
+                                {
+                                    <img src="@book.CoverImageUrl"
+                                         class="book-cover-img rounded"
+                                         alt="@book.Title" />
+                                }
+
+                            </div>
+
+                            <div class="flex-grow-1">
+
+                                <h4 class="font-serif mb-1">
+                                    @book.Title
+                                </h4>
+
+                                <small class="d-block mb-3"
+                                       style="color: var(--folio-slate);">
+                                    by @book.Author
+                                </small>
+
+                            </div>
+
+                            <div class="border-top pt-3 mt-2"
+                                 style="border-color: var(--folio-sand) !important;">
+
+                                <select class="form-select form-select-sm"
+                                        value="@book.Status"
+                                        @onchange="async e =>
+                                            await ChangeBookStatus(
+                                                book.Id,
+                                                e.Value?.ToString())">
+
+                                    <option value="To-Read">To-Read</option>
+                                    <option value="Reading">Reading</option>
+                                    <option value="Completed">Completed</option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="folio-card text-center py-5">
+
+                <span class="eyebrow-tag">Currently Reading</span>
+
+                <h3 class="font-serif mb-2">
+                    You aren't reading anything yet
+                </h3>
+
+                <p class="text-muted mb-0">
+                    Move a book here when you start reading it.
+                </p>
+
+            </div>
+        }
+
+    </div>
+
+
+    <!-- Completed -->
+    <div class="mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="h3 mb-0">Completed</h3>
+            <span class="text-muted small">@completedBooks.Count books</span>
+        </div>
+
+        @if (completedBooks.Any())
+        {
+            <div class="row g-4">
+
+                @foreach (var book in completedBooks)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+
+                        <div class="folio-card h-100 d-flex flex-column">
+
+                            <div class="book-cover-wrapper rounded p-3 text-center mb-3
+                                        d-flex align-items-center justify-content-center">
+
+                                @if (!string.IsNullOrWhiteSpace(book.CoverImageUrl))
+                                {
+                                    <img src="@book.CoverImageUrl"
+                                         class="book-cover-img rounded"
+                                         alt="@book.Title" />
+                                }
+
+                            </div>
+
+                            <div class="flex-grow-1">
+
+                                <h4 class="font-serif mb-1">
+                                    @book.Title
+                                </h4>
+
+                                <small class="d-block mb-3"
+                                       style="color: var(--folio-slate);">
+                                    by @book.Author
+                                </small>
+
+                            </div>
+
+                            <div class="border-top pt-3 mt-2"
+                                 style="border-color: var(--folio-sand) !important;">
+
+                                <select class="form-select form-select-sm"
+                                        value="@book.Status"
+                                        @onchange="async e =>
+                                            await ChangeBookStatus(
+                                                book.Id,
+                                                e.Value?.ToString())">
+
+                                    <option value="To-Read">To-Read</option>
+                                    <option value="Reading">Reading</option>
+                                    <option value="Completed">Completed</option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="folio-card text-center py-5">
+
+                <span class="eyebrow-tag">Completed</span>
+
+                <h3 class="font-serif mb-2">
+                    No completed books yet
+                </h3>
+
+                <p class="text-muted mb-0">
+                    Books you finish will appear here.
+                </p>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+    </Authorized>
+
+    <NotAuthorized>
+        <div class="container py-5">
+            <div class="folio-card text-center py-5">
+
+                <span class="eyebrow-tag">BookRec Dashboard</span>
+
+                <h1 class="display-5 mb-3">Sign in to continue</h1>
+
+                <p class="text-muted mb-4">
+                    Sign in with GitHub to access your personal reading dashboard.
+                </p>
+
+                <a href="/signin" class="btn-dark-solid">
+                    Sign In with GitHub
+                </a>
+
+            </div>
+        </div>
+    </NotAuthorized>
+
+</AuthorizeView>
+
+@code {
+    private bool loading = true;
+
+    private string? avatarUrl;
+    private string? email;
+    private DateTime? createdAt;
+
+    private int savedBooksCount;
+    private int reviewsCount;
+    private int searchesCount;
+     private List<UserBook> toReadBooks = new();
+     private List<UserBook> readingBooks = new();
+    private List<UserBook> completedBooks = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authenticationState.User;
+
+        if (!(user.Identity?.IsAuthenticated ?? false))
+        {
+            loading = false;
+            return;
+        }
+
+        var userId =
+            user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            loading = false;
+            return;
+        }
+
+        // Load the authenticated user's database record
+        var dbUser = await Db.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (dbUser != null)
+        {
+            avatarUrl = dbUser.AvatarUrl;
+            email = dbUser.Email;
+            createdAt = dbUser.CreatedAt;
+        }
+
+        // Dashboard statistics
+        savedBooksCount = await Db.UserBooks
+            .CountAsync(ub => ub.UserId == userId);
+
+        reviewsCount = await Db.BookReviews
+            .CountAsync(br => br.UserId == userId);
+
+        searchesCount = await Db.SearchHistories
+            .CountAsync(sh => sh.UserId == userId);
+
+        loading = false;
+        toReadBooks = await ReadingListService.GetBooksAsync("To-Read");
+
+        readingBooks = await ReadingListService.GetBooksAsync("Reading");
+
+        completedBooks = await ReadingListService.GetBooksAsync("Completed");
+    }
+    private async Task ChangeBookStatus(int bookId, string? newStatus)
+    {
+        if (string.IsNullOrWhiteSpace(newStatus))
+            return;
+
+        await ReadingListService.UpdateStatusAsync(bookId, newStatus);
+
+        toReadBooks = await ReadingListService.GetBooksAsync("To-Read");
+        readingBooks = await ReadingListService.GetBooksAsync("Reading");
+        completedBooks = await ReadingListService.GetBooksAsync("Completed");
+
+        savedBooksCount = toReadBooks.Count
+                        + readingBooks.Count
+                        + completedBooks.Count;
+    }
+}

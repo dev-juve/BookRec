@@ -27,6 +27,7 @@ This project is a lightweight, fully responsive web application built using **.N
 ## Group Members
 Juvenson Elizaire
 Cris Altman
+Kusasira Solomon
 
 
 ## Getting Started

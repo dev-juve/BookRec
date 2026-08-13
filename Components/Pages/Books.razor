@@ -6,6 +6,7 @@
 @using BookRec.Models
 @inject GoogleBooksApiService GoogleBookService
 @inject BookService BookService
+@inject ReadingListService ReadingListService
 
 <link rel="stylesheet" href="css/folio-theme.css" />
 
@@ -30,7 +31,7 @@ else
             </div> *@
                 @foreach (var book in showAllBooks)
                 {
-                    <BookCard Book="book" OnAddToToReadList="BookService.AddToToReadList" />
+                    <BookCard Book="book" OnAddToToReadList="AddToToReadList" />
                 }
             </div>
             <div class="pagination-buttons">
@@ -46,6 +47,10 @@ else
 {
     private int CurrentPage = 1;
     private List<Book>? showAllBooks;
+    private async Task AddToToReadList(Book book)
+    {
+        await ReadingListService.AddToToReadAsync(book);
+    }
 
     protected override async Task OnInitializedAsync()
     {
