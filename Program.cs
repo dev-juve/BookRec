@@ -4,6 +4,7 @@ using System.Security.Claims;
 using BookRec.Data;
 using BookRec.Models;
 using BookRec.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
 using DotNetEnv;
 
@@ -97,6 +98,15 @@ builder.Services.AddScoped<AppDbContext>(p =>
     p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
 var app = builder.Build();
+
+// Configure Forwarded Headers for Render/cloud proxies
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedOptions.KnownIPNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
 
 using (var scope = app.Services.CreateScope())
 {
