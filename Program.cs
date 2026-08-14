@@ -86,8 +86,12 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
+var dbPath = builder.Environment.IsDevelopment()
+    ? "bookrec.db"
+    : Path.Combine("/home", "bookrec.db");
+
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
-    options.UseSqlite("Data Source=bookrec.db"));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddScoped<AppDbContext>(p => 
     p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
