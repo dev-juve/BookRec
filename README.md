@@ -33,17 +33,17 @@ Cris Altman
 Clone the repository and navigate into the project folder:  
 MD
 
-Bash
-git clone https://github.com/dev-juve/BookRec.git
-cd BookRec/BookRecWeb
-Set up your Environment Variables:
-Create a file named .env right inside the BookRecWeb folder and add your keys:
+*Bash
+*git clone https://github.com/dev-juve/BookRec.git
+*cd BookRec/BookRecWeb
+*Set up your Environment Variables:
+*Create a file named .env right inside the BookRecWeb folder and add your keys:
 
-Code snippet
-GITHUB_CLIENT_ID=your_client_id_here
-GITHUB_CLIENT_SECRET=your_client_secret_here
-GOOGLE_BOOKS_API_KEY=your_google_books_api_key_here
-Run the app:
+*Code snippet
+*GITHUB_CLIENT_ID=your_client_id_here
+*GITHUB_CLIENT_SECRET=your_client_secret_here
+*GOOGLE_BOOKS_API_KEY=your_google_books_api_key_here
+*Run the app:
 
-Bash
-dotnet run
+*Bash
+*dotnet run
