@@ -57,11 +57,18 @@
                 }
                 else if (showAllBooks == null || !showAllBooks.Any())
                 {
-                    <div class="text-center py-5 bg-white rounded-3 border" style="border-color: var(--folio-sand, #e8e2d5) !important;">
-                        <i class="bi bi-journal-x fs-1 text-muted mb-2 d-block"></i>
-                        <h5 class="fw-bold text-dark">No books found</h5>
-                        <p class="text-muted small">Try searching for a different term or clear active filters.</p>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill px-3" @onclick='() => ApplySearch("a")'>Reset Catalog</button>
+                    <div class="text-center py-5 bg-white rounded-3 border shadow-sm" style="border-color: var(--folio-sand, #e8e2d5) !important;">
+                        <i class="bi bi-exclamation-circle fs-1 text-muted mb-2 d-block"></i>
+                        <h5 class="fw-bold text-dark">Catalog temporarily unavailable or no books found</h5>
+                        <p class="text-muted small px-4">We couldn't reach the book service right now, or your search didn't return any matches. Try again or reset your view.</p>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <button class="btn btn-sm btn-dark rounded-pill px-4 shadow-sm" @onclick="LoadCatalog">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Try Again
+                            </button>
+                            <button class="btn btn-sm btn-outline-dark rounded-pill px-4" @onclick='() => ApplySearch("a")'>
+                                Reset Catalog
+                            </button>
+                        </div>
                     </div>
                 }
                 else

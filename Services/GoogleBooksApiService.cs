@@ -45,7 +45,7 @@ public class GoogleBooksApiService
                     Title = volumeInfo.TryGetProperty("title", out var title) ? title.GetString() ?? "Unknown Title" : "Unknown Title",
                     Author = volumeInfo.TryGetProperty("authors", out var authors) && authors.GetArrayLength() > 0 ? authors[0].GetString() ?? "Unknown Author" : "Unknown Author",
                     Description = volumeInfo.TryGetProperty("description", out var desc) ? desc.GetString() ?? "No description available." : "No description available.",
-                    CoverImageUrl = volumeInfo.TryGetProperty("imageLinks", out var images) && images.TryGetProperty("thumbnail", out var thumbnail) ? thumbnail.GetString()?.Replace("http:", "https:") ?? "/images/fallback/clean-code.jpg" : "/images/fallback/clean-code.jpg"
+                    CoverImageUrl = volumeInfo.TryGetProperty("imageLinks", out var images) && images.TryGetProperty("thumbnail", out var thumbnail) ? thumbnail.GetString()?.Replace("http:", "https:") ?? "https://via.placeholder.com/150x220?text=No+Cover" : "https://via.placeholder.com/150x220?text=No+Cover"
                 };
             }
             return null;
@@ -63,79 +63,58 @@ public class GoogleBooksApiService
 
         var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(categoryQuery)}&orderBy=relevance&startIndex={startIndex}&maxResults={maxResults}&key={_apiKey}";
 
-        try
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
-            var response = await _httpClient.GetAsync(url);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                return GetFallbackBooks();
-            }
+                var response = await _httpClient.GetAsync(url);
 
-            var result = await response.Content.ReadFromJsonAsync<GoogleBooksResponse>();
-
-            if (result?.Items == null || !result.Items.Any())
-                return GetFallbackBooks();
-
-            return result.Items.Select((item, index) =>
-            {
-                var googleCategory = item.VolumeInfo?.Categories?.FirstOrDefault();
-                BookCategory mappedCategory = BookCategory.SelfDevelopment;
-
-                if (!string.IsNullOrEmpty(googleCategory))
+                if (response.IsSuccessStatusCode)
                 {
-                    Enum.TryParse<BookCategory>(googleCategory.Replace(" ", ""), true, out mappedCategory);
+                    var result = await response.Content.ReadFromJsonAsync<GoogleBooksResponse>();
+
+                    if (result?.Items != null && result.Items.Any())
+                    {
+                        return result.Items.Select((item, index) =>
+                        {
+                            var googleCategory = item.VolumeInfo?.Categories?.FirstOrDefault();
+                            BookCategory mappedCategory = BookCategory.SelfDevelopment;
+
+                            if (!string.IsNullOrEmpty(googleCategory))
+                            {
+                                Enum.TryParse<BookCategory>(googleCategory.Replace(" ", ""), true, out mappedCategory);
+                            }
+
+                            return new Book
+                            {
+                                Id = index + 100,
+                                GoogleBookId = item.Id ?? string.Empty,
+                                Title = item.VolumeInfo?.Title ?? "Untitled",
+                                Author = item.VolumeInfo?.Authors != null ? string.Join(", ", item.VolumeInfo.Authors) : "Unknown Author",
+                                Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
+                                Description = item.VolumeInfo?.Description ?? "No description available for this volume.",
+                                CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?.Replace("http://", "https://") ?? "https://via.placeholder.com/150x220?text=No+Cover",
+                                DisplayCategory = googleCategory ?? mappedCategory.ToString(),
+                                IsBestseller = index % 3 == 0
+                            };
+                        }).ToList();
+                    }
                 }
-
-                return new Book
-                {
-                    Id = index + 100,
-                    GoogleBookId = item.Id ?? string.Empty,
-                    Title = item.VolumeInfo?.Title ?? "Untitled",
-                    Author = item.VolumeInfo?.Authors != null ? string.Join(", ", item.VolumeInfo.Authors) : "Unknown Author",
-                    Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
-                    Description = item.VolumeInfo?.Description ?? "No description available for this volume.",
-                    CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?.Replace("http://", "https://") ?? "https://via.placeholder.com/150x220?text=No+Cover",
-                    DisplayCategory = googleCategory ?? mappedCategory.ToString(),
-                    IsBestseller = index % 3 == 0
-                };
-            }).ToList();
-        }
-        catch
-        {
-            return GetFallbackBooks();
-        }
-    }
-
-    private List<Book> GetFallbackBooks()
-    {
-        return new List<Book>
-        {
-            new Book 
-            { 
-                Id = 1, 
-                GoogleBookId = "XfFvDwAAQBAJ",
-                Title = "Atomic Habits", 
-                Author = "James Clear", 
-                Category = BookCategory.SelfDevelopment, 
-                Publisher = "Penguin", 
-                IsBestseller = true, 
-                Description = "An easy & proven way to build good habits & break bad ones.",
-                CoverImageUrl = "/images/fallback/atomic-habits.jpg"
-            },
-            new Book 
-            { 
-                Id = 2, 
-                GoogleBookId = "_i6bDeoCQzsC",
-                Title = "Clean Code", 
-                Author = "Robert C. Martin", 
-                Category = BookCategory.Programming, 
-                Publisher = "Prentice Hall", 
-                IsBestseller = true, 
-                Description = "A handbook of agile software craftsmanship.",
-                CoverImageUrl = "/images/fallback/clean-code.jpg" 
             }
-        };
+            catch
+            {
+                // suppress exception during attempt to allow retrying
+            }
+
+            if (attempt < maxRetries)
+            {
+                await Task.Delay(1000 * attempt);
+            }
+        }
+
+        // return empty list so the UI displays try again button
+        return new List<Book>();
     }
 }
 
