@@ -1,5 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@implements IDisposable
+@inject PersistentComponentState ApplicationState
 @using BookRec.Models
 @using BookRec.Services
 @using BookRec.Components.Landing
@@ -29,12 +31,35 @@
 @code {
     private List<Book> recentBooks = new();
     private string currentSubject = "subject:computers";
+    private PersistingComponentStateSubscription persistingSubscription;
 
     protected override async Task OnInitializedAsync()
     {
-        await BookService.SeedLocalBooksAsync();
+        // register the subscription
+        persistingSubscription = ApplicationState.RegisterOnPersisting(PersistData);
 
-        recentBooks = await BookService.GetTrendingLocalBooksAsync();
+        // check if we have saved data from the ghost page
+        if (!ApplicationState.TryTakeFromJson<List<Book>>("home_recentBooks", out var restoredData))
+        {
+            await BookService.SeedLocalBooksAsync();
+            recentBooks = await BookService.GetTrendingLocalBooksAsync();
+        }
+        else
+        {
+            // load instantly without hitting the database
+            recentBooks = restoredData!;
+        }
+    }
+
+    private Task PersistData()
+    {
+        ApplicationState.PersistAsJson("home_recentBooks", recentBooks);
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        persistingSubscription.Dispose();
     }
 
     private void HandleSubjectSelected(string categoryQuery)
