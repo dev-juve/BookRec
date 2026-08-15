@@ -13,6 +13,7 @@ public class UserService
         _context = context;
     }
 
+    // checks if user is in db, if not it makes a new one
     public async Task GetUserAsync()
     {
         if (Id == null)
@@ -47,6 +48,7 @@ public class UserService
         await _context.SaveChangesAsync();
     }
 
+    // helper properties to grab data from the cookies
     public ClaimsPrincipal? User => 
         _httpContextAccessor.HttpContext?.User;
 
@@ -61,12 +63,13 @@ public class UserService
     public string? Name => 
         User?.FindFirst("urn:github:name")?.Value;
 
+    // gets the github profile pic or falls back to our local gray head image
     public string? AvatarUrl
     {
         get
         {
             var url = User?.FindFirst("urn:github:avatar_url")?.Value ?? User?.FindFirst("urn:github:avatar")?.Value;
-            return !string.IsNullOrEmpty(url) ? url : "https://via.placeholder.com/150/6c757d/ffffff?text=U";
+            return !string.IsNullOrEmpty(url) ? url : "/images/default-avatar.svg";
         }
     }
 }

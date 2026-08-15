@@ -27,11 +27,11 @@
                     
                         <div class="folio-card p-4 bg-white rounded-4 shadow-sm border" style="border-color: var(--folio-sand) !important;">
                             <div class="text-center mb-3">
-                                <img src="@(string.IsNullOrWhiteSpace(userService.AvatarUrl) ? "https://via.placeholder.com/150/6c757d/ffffff?text=U" : userService.AvatarUrl)" 
-                                     alt="@userService.Name" 
-                                     class="rounded-circle shadow-sm border" 
-                                     style="width: 120px; height: 120px; object-fit: cover; border-color: var(--folio-sand) !important;" />
-                            </div>
+                                <img src="@(string.IsNullOrWhiteSpace(userService.AvatarUrl) ? "/images/default-avatar.svg" : userService.AvatarUrl)" 
+                                alt="@userService.Name" 
+                                class="rounded-circle shadow-sm border bg-light" 
+                                style="width: 120px; height: 120px; object-fit: cover; border-color: var(--folio-sand) !important;" />
+                            </div>    
                             
                             <div class="text-center">
                                 <h4 class="font-serif fw-bold text-dark mb-1">@userService.Name</h4>

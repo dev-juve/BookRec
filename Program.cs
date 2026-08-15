@@ -8,26 +8,43 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
 using DotNetEnv;
 
+// load the env file variables
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient();
-builder.Services.AddHttpClient<GoogleBooksApiService>();
-builder.Services.AddScoped<BookService>();
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<UserService>();
+// --- database setup ---
 
+// figure out where to save the sqlite file depending on environment
+var dbPath = builder.Environment.IsDevelopment()
+    ? "bookrec.db"
+    : Path.Combine("/home", "bookrec.db");
+
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+    options.UseSqlite($"Data Source={dbPath}"));
+
+builder.Services.AddScoped<AppDbContext>(p => 
+    p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
+
+
+
+
+// --- keys and secrets ---
+
+// grab the keys from env file, crash if they are missing
 var githubClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID") 
     ?? throw new InvalidOperationException("GITHUB_CLIENT_ID is missing from .env");
 
 var githubClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET") 
     ?? throw new InvalidOperationException("GITHUB_CLIENT_SECRET is missing from .env");
 
+
+
+// --- auth setup ---
+
+// setting up the github login and cookies
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "Cookies";
@@ -40,8 +57,8 @@ builder.Services.AddAuthentication(options =>
     options.ClientId = githubClientId;
     options.ClientSecret = githubClientSecret;
     options.Scope.Add("user:email");
-
     
+    // save the user to our database when they log in
     options.Events.OnCreatingTicket = async context =>
     {
         var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
@@ -57,6 +74,7 @@ builder.Services.AddAuthentication(options =>
         {
             var user = await db.Users.FirstOrDefaultAsync(u => u.Id == githubId);
 
+            // create a new user if we haven't seen them before
             if (user == null)
             {
                 user = new User
@@ -72,6 +90,7 @@ builder.Services.AddAuthentication(options =>
             }
             else
             {
+                // update their info in case they changed it on github
                 user.Username = username;
                 user.Email = email ?? user.Email;
                 user.AvatarUrl = avatarUrl ?? user.AvatarUrl;
@@ -87,27 +106,27 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-var dbPath = builder.Environment.IsDevelopment()
-    ? "bookrec.db"
-    : Path.Combine("/home", "bookrec.db");
 
-builder.Services.AddDbContextFactory<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
 
-builder.Services.AddScoped<AppDbContext>(p => 
-    p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
+// --- services setup ---
+
+// adding blazor and all our custom services here
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<GoogleBooksApiService>();
+builder.Services.AddScoped<BookService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
-// Configure Forwarded Headers for Render/cloud proxies
-var forwardedOptions = new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-};
-forwardedOptions.KnownIPNetworks.Clear();
-forwardedOptions.KnownProxies.Clear();
-app.UseForwardedHeaders(forwardedOptions);
 
+
+// --- database migrations ---
+
+// update the db automatically so we don't forget to do it manually
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -123,6 +142,17 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// --- middleware pipeline ---
+
+// fix headers for render deployment proxies
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedOptions.KnownIPNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -134,7 +164,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 
+// --- endpoints ---
+
+// custom route to trigger the github sign in popup
 app.MapGet("/signin", async (HttpContext context) =>
 {
     await context.ChallengeAsync("GitHub",
@@ -144,16 +178,16 @@ app.MapGet("/signin", async (HttpContext context) =>
     });
 });
 
+// custom route to clear cookies and sign out
 app.MapGet("/signout", async (HttpContext context) => 
 {
     await context.SignOutAsync("Cookies");
     context.Response.Redirect("/");
 });
 
-app.UseAntiforgery();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+// run the app
 app.Run();

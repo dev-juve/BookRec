@@ -16,8 +16,7 @@ public class BookService
         SeedMockData();
     }
 
-    // --- new method for the local data mirroring ---
-
+    // gets the trending books from our db
     public async Task<List<Book>> GetTrendingLocalBooksAsync()
     {
         var localBooks = await _context.LocalBooks
@@ -32,12 +31,13 @@ public class BookService
             Title = lb.Title,
             Author = lb.Author,
             Description = lb.Description ?? "No description available.",
-            CoverImageUrl = lb.CoverImageUrl ?? "https://via.placeholder.com/150x220?text=No+Cover",
+            CoverImageUrl = lb.CoverImageUrl ?? "/images/default-cover.svg",
             DisplayCategory = lb.Category ?? "Trending",
             IsBestseller = lb.IsTrending
         }).ToList();
     }
 
+    // adding some local books if the table is empty so it doesn't look weird
     public async Task SeedLocalBooksAsync()
     {
         if (await _context.LocalBooks.CountAsync() < 12)
@@ -67,8 +67,7 @@ public class BookService
         }
     }
 
-    // --- new method for search login---
-    
+    // keep track of what the user searches for
     public async Task LogUserSearchAsync(string userId, string query)
     {
         if (string.IsNullOrWhiteSpace(query) || string.IsNullOrWhiteSpace(userId))
@@ -79,6 +78,7 @@ public class BookService
         var existingSearch = await _context.SearchHistories
             .FirstOrDefaultAsync(sh => sh.UserId == userId && sh.SearchQuery.ToLower() == normalizedQuery.ToLower());
 
+        // delete the old search if they search the exact same thing again
         if (existingSearch != null)
         {
             _context.SearchHistories.Remove(existingSearch);
@@ -95,6 +95,8 @@ public class BookService
         await _context.SaveChangesAsync();
 
         var userSearchesCount = await _context.SearchHistories.CountAsync(sh => sh.UserId == userId);
+        
+        // don't let the table get too huge, keep only the last 10
         if (userSearchesCount > 10)
         {
             var searchesToRemove = await _context.SearchHistories
@@ -108,8 +110,7 @@ public class BookService
         }
     }
 
-    // --- the old methods --
-
+    // returns all the books
     public async Task<List<Book>> GetAllBooks()
     {
         return await Task.FromResult(_books);
@@ -120,6 +121,7 @@ public class BookService
         return await _context.Books.CountAsync();
     }
 
+    // filters the book list based on what was passed in
     public List<Book> FilterBooks(BookCategory? category, bool? onlyBestsellers, string? searchString)
     {
         var query = _books.AsEnumerable();
@@ -137,6 +139,7 @@ public class BookService
         return query.ToList();
     }
 
+    // grabs the user's reading list from the db
     public async Task<List<UserToReadBook>> GetToReadList(string userId)
     {
         return await _context.UserToReadBooks
@@ -145,6 +148,7 @@ public class BookService
             .ToListAsync();
     }
 
+    // adds a book to the user's reading list
     public async Task AddToReadList(Book book, string userId)
     {
         var existing = await _context.UserToReadBooks
@@ -170,6 +174,7 @@ public class BookService
         }
     }
 
+    // deletes a book from the reading list
     public async Task RemoveFromReadList(int userBookId, string userId)
     {
         var userBook = await _context.UserToReadBooks

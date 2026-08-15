@@ -13,6 +13,7 @@ public class GoogleBooksApiService
     {
         _httpClient = httpClient;
 
+        // get the api key from env file, crash if we forgot to add it
         _apiKey = Environment.GetEnvironmentVariable("GOOGLE_BOOKS_API_KEY")
             ?? throw new InvalidOperationException("GOOGLE_BOOKS_API_KEY is missing from environment/env file.");
 
@@ -24,6 +25,7 @@ public class GoogleBooksApiService
         }
     }
 
+    // fetch a single book using the google api
     public async Task<Book?> GetBookByIdAsync(string bookId)
     {
         try
@@ -45,7 +47,8 @@ public class GoogleBooksApiService
                     Title = volumeInfo.TryGetProperty("title", out var title) ? title.GetString() ?? "Unknown Title" : "Unknown Title",
                     Author = volumeInfo.TryGetProperty("authors", out var authors) && authors.GetArrayLength() > 0 ? authors[0].GetString() ?? "Unknown Author" : "Unknown Author",
                     Description = volumeInfo.TryGetProperty("description", out var desc) ? desc.GetString() ?? "No description available." : "No description available.",
-                    CoverImageUrl = volumeInfo.TryGetProperty("imageLinks", out var images) && images.TryGetProperty("thumbnail", out var thumbnail) ? thumbnail.GetString()?.Replace("http:", "https:") ?? "https://via.placeholder.com/150x220?text=No+Cover" : "https://via.placeholder.com/150x220?text=No+Cover"
+                    // use default cover if google doesn't give us one
+                    CoverImageUrl = volumeInfo.TryGetProperty("imageLinks", out var images) && images.TryGetProperty("thumbnail", out var thumbnail) ? thumbnail.GetString()?.Replace("http:", "https:") ?? "/images/default-cover.svg" : "/images/default-cover.svg"
                 };
             }
             return null;
@@ -56,6 +59,7 @@ public class GoogleBooksApiService
         }
     }
 
+    // searches google books, returns 12 items at a time
     public async Task<List<Book>> SearchBooksAsync(string categoryQuery = "a", int pageNumber = 1)
     {
         int maxResults = 12;
@@ -63,6 +67,7 @@ public class GoogleBooksApiService
 
         var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(categoryQuery)}&orderBy=relevance&startIndex={startIndex}&maxResults={maxResults}&key={_apiKey}";
 
+        // try 3 times just in case the wifi drops or something
         int maxRetries = 3;
         for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
@@ -94,7 +99,7 @@ public class GoogleBooksApiService
                                 Author = item.VolumeInfo?.Authors != null ? string.Join(", ", item.VolumeInfo.Authors) : "Unknown Author",
                                 Publisher = item.VolumeInfo?.Publisher ?? "Independent Publisher",
                                 Description = item.VolumeInfo?.Description ?? "No description available for this volume.",
-                                CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?.Replace("http://", "https://") ?? "https://via.placeholder.com/150x220?text=No+Cover",
+                                CoverImageUrl = item.VolumeInfo?.ImageLinks?.Thumbnail?.Replace("http://", "https://") ?? "/images/default-cover.svg",
                                 DisplayCategory = googleCategory ?? mappedCategory.ToString(),
                                 IsBestseller = index % 3 == 0
                             };
@@ -104,7 +109,7 @@ public class GoogleBooksApiService
             }
             catch
             {
-                // suppress exception during attempt to allow retrying
+                // ignore errors here so it can try again
             }
 
             if (attempt < maxRetries)
@@ -113,7 +118,7 @@ public class GoogleBooksApiService
             }
         }
 
-        // return empty list so the UI displays try again button
+        // return an empty list if it totally failed
         return new List<Book>();
     }
 }

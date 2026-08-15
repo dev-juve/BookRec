@@ -109,7 +109,10 @@ else
                         {
                             <div class="p-4 bg-white rounded-4 border shadow-sm" style="border-color: var(--folio-sand, #e8e2d5) !important;">
                                 <div class="d-flex align-items-center gap-3 mb-3">
-                                    <img src="@(review.User?.AvatarUrl ?? "https://via.placeholder.com/150/6c757d/ffffff?text=U")" alt="@review.User?.Username" class="rounded-circle border" style="width: 45px; height: 45px; object-fit: cover;" />
+                                    <img src="@(string.IsNullOrEmpty(review.User?.AvatarUrl) ? "/images/default-avatar.svg" : review.User.AvatarUrl)" 
+                                        alt="@review.User?.Username" 
+                                        class="rounded-circle border bg-light" 
+                                        style="width: 45px; height: 45px; object-fit: cover;" />
                                     
                                     <div>
                                         <h6 class="m-0 fw-bold text-dark">@(review.User?.Username ?? "Unknown User")</h6>

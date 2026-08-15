@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="220" viewBox="0 0 150 220">
+  <rect width="150" height="220" fill="#e8e2d5"/>
+  <!-- book icon -->
+  <path d="M40 60 h70 v100 h-70 z" fill="none" stroke="#6c757d" stroke-width="4"/>
+  <path d="M40 60 v100 c-10 0 -15 -5 -15 -10 v-80 c0 -5 5 -10 15 -10" fill="none" stroke="#6c757d" stroke-width="4"/>
+  <line x1="50" y1="80" x2="100" y2="80" stroke="#6c757d" stroke-width="4"/>
+  <line x1="50" y1="100" x2="90" y2="100" stroke="#6c757d" stroke-width="4"/>
+  <!-- text -->
+  <text x="50%" y="190" dominant-baseline="middle" text-anchor="middle" fill="#6c757d" font-family="sans-serif" font-weight="bold" font-size="14">No Cover</text>
+</svg>

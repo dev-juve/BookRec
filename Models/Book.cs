@@ -11,7 +11,7 @@ public class Book
     public string Publisher { get; set; } = string.Empty;
     public bool IsBestseller { get; set; }
     public string Description { get; set; } = string.Empty;
-    public string CoverImageUrl { get; set; } = "https://via.placeholder.com/150x220?text=No+Cover";
+    public string CoverImageUrl { get; set; } = "/default-cover.svg";
     public string GoogleBookId { get; set; } = string.Empty;
     
     [NotMapped]
