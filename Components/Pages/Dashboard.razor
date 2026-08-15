@@ -124,7 +124,10 @@
                                         
                                         <!-- actions -->
                                         <div class="d-flex align-items-center gap-2 w-100 w-sm-auto" @onclick:stopPropagation="true">
-                                            <select class="form-select form-select-sm border bg-light rounded-pill px-3 shadow-none fw-medium" 
+                                            <select id="status-@book.Id"
+                                                    name="status-@book.Id"
+                                                    aria-label="Reading status for @book.Title"
+                                                    class="form-select form-select-sm border bg-light rounded-pill px-3 shadow-none fw-medium" 
                                                     value="@book.Status"
                                                     @onchange="async e => await UpdateReadStatus(book.Id, e.Value?.ToString())"
                                                     style="width: 140px; cursor: pointer; border-color: var(--folio-sand) !important;">
