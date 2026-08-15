@@ -6,7 +6,7 @@
 @inject UserService userService
 @inject BookService BookService
 @inject NavigationManager Navigation
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <header class="bg-white border-bottom py-3 px-4 sticky-top shadow-sm">
     <div class="container-fluid d-flex align-items-center justify-content-between max-w-1200">
