@@ -1,10 +1,12 @@
 ﻿@page "/"
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@rendermode InteractiveServer
+@implements IDisposable
 @using BookRec.Models
 @using BookRec.Services
 @using BookRec.Components.Landing
 @inject BookService BookService
 @inject NavigationManager Navigation
+@inject PersistentComponentState ApplicationState
 
 <PageTitle>BookRec • Reimagining Book Discovery</PageTitle>
 
@@ -29,11 +31,32 @@
 @code {
     private List<Book> recentBooks = new();
     private string currentSubject = "subject:computers";
+    private PersistingComponentStateSubscription persistingSubscription;
 
     protected override async Task OnInitializedAsync()
     {
-        await BookService.SeedLocalBooksAsync();
-        recentBooks = await BookService.GetTrendingLocalBooksAsync();
+        persistingSubscription = ApplicationState.RegisterOnPersisting(PersistData);
+
+        if (!ApplicationState.TryTakeFromJson<List<Book>>("home_recentBooks", out var restoredData))
+        {
+            await BookService.SeedLocalBooksAsync();
+            recentBooks = await BookService.GetTrendingLocalBooksAsync();
+        }
+        else
+        {
+            recentBooks = restoredData!;
+        }
+    }
+
+    private Task PersistData()
+    {
+        ApplicationState.PersistAsJson("home_recentBooks", recentBooks);
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        persistingSubscription.Dispose();
     }
 
     private void HandleSubjectSelected(string categoryQuery)

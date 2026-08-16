@@ -6,14 +6,13 @@ using BookRec.Models;
 using BookRec.Services;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.ResponseCompression;
 using DotNetEnv;
 
 // load the env file variables
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 // --- database setup ---
 
@@ -28,9 +27,6 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
 builder.Services.AddScoped<AppDbContext>(p => 
     p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
-
-
-
 // --- keys and secrets ---
 
 // grab the keys from env file, crash if they are missing
@@ -39,8 +35,6 @@ var githubClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID")
 
 var githubClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET") 
     ?? throw new InvalidOperationException("GITHUB_CLIENT_SECRET is missing from .env");
-
-
 
 // --- auth setup ---
 
@@ -106,7 +100,13 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-
+// --- response compression setup ---
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
 
 // --- services setup ---
 
@@ -121,8 +121,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
-
-
 
 // --- database migrations ---
 
@@ -160,6 +158,9 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+
+// enable server response compression before serving files
+app.UseResponseCompression();
 
 app.UseStaticFiles();
 app.UseAuthentication();

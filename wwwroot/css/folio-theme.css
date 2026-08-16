@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap');
-
 :root {
     /* colors */
     --folio-black: #1E1E1E;
@@ -13,7 +11,6 @@
     /* fonts */
     --font-serif: 'Newsreader', Georgia, serif;
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-
 }
 
 body {
@@ -115,106 +112,93 @@ h1, h2, h3, h4, .font-serif {
     border-color: var(--folio-terracotta);
 }
 
-
 .folio-section {
     padding-top: 5rem;
     padding-bottom: 5rem;
 }
 
-    .book-cover-wrapper {
-        background: linear-gradient(145deg, #f3efe6, #faf8f5);
-        height: 220px;
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
-    }
+.book-cover-wrapper {
+    background: linear-gradient(145deg, #f3efe6, #faf8f5);
+    height: 220px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+}
 
-    .book-cover-img {
-        max-height: 180px;
-        width: auto;
-        max-width: 100%;
-        object-fit: contain;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+.book-cover-img {
+    max-height: 180px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-    .folio-card:hover .book-cover-img {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
-    }
+.folio-card:hover .book-cover-img {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
 
-    .text-truncate-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+.text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
-    #all-books-header,
-    #user-profile-header {
-        padding: 10px;
-    }
+#all-books-header,
+#user-profile-header {
+    padding: 10px;
+}
 
-    .pagination-buttons,
-    .filter-buttons {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin: 10px;
-    }
+.pagination-buttons,
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px;
+}
 
-    .pagination-buttons,
-    .filter-buttons {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin: 10px;
-    }
+.btn-pagination {
+    text-align: center;
+    border: 1px solid var(--folio-terracotta);
+    color: var(--folio-terracotta);
+    width: 10%;
+}
 
-   .btn-pagination {
-        text-align: center;
-        border: 1px solid var(--folio-terracotta);
-        color: var(--folio-terracotta);
-   }
+.btn-pagination:hover {
+    background-color: var(--folio-sand);
+    color: var(--folio-black);
+}
 
-    .btn-pagination {
-        width: 10%;
-    }
+.btn-pagination:disabled {
+    background-color: var(--folio-white);
+    color: var(--folio-slate);
+    border: var(--folio-slate);
+}
 
-    .btn-pagination:hover {
-        background-color: var(--folio-sand);
-        color: var(--folio-black);
-    }
+.page-number {
+    font-weight: 700;
+}
 
-    .btn-pagination:disabled {
-        background-color: var(--folio-white);
-        color: var(--folio-slate);
-        border: var(--folio-slate);
-    }
+#reading-list {
+    padding: 0 20px 0 10px;
+    text-align: center;
+}
 
-    .page-number {
-        font-weight: 700;
-    }
+#profile {
+    padding: 20px;
+}
 
-    #reading-list {
-        /* margin: 0 20px 0 0; */
-        padding: 0 20px 0 10px;
-        text-align: center;
-    }
+#dashboard-signin {
+    margin: 10%;
+}
 
-    #profile {
-        padding: 20px;
-    }
+.alert-success {
+    text-align: center;
+    color: var(--folio-terracotta);
+    font-weight: 700;
+}
 
-    #dashboard-signin {
-        margin: 10%;
-    }
-
-    .alert-success {
-        text-align: center;
-        color: var(--folio-terracotta);
-        font-weight: 700;
-    }
-
-    #title {
-        text-align: left;
-        padding: 5px;
-    }
+#title {
+    text-align: left;
+    padding: 5px;
+}

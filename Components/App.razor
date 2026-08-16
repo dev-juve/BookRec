@@ -5,14 +5,43 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    
+    <!-- standard SEO metadata -->
+    <meta name="description" content="Reimagining book discovery through intelligent recommendation streams, curated subject categorization, and personal reading list tracking." />
+    <meta name="author" content="BookRec" />
+
+    <!-- open graph metadata -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bookrec-rbqv.onrender.com/" />
+    <meta property="og:title" content="BookRec • Reimagining Book Discovery" />
+    <meta property="og:description" content="Reimagining book discovery through intelligent recommendation streams, curated subject categorization, and personal reading list tracking." />
+    <meta property="og:image" content="https://bookrec-rbqv.onrender.com/images/hero-books.webp" />
+
+    <!-- twitter/X card Metadata -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://bookrec-rbqv.onrender.com/" />
+    <meta property="twitter:title" content="BookRec • Reimagining Book Discovery" />
+    <meta property="twitter:description" content="Reimagining book discovery through intelligent recommendation streams, curated subject categorization, and personal reading list tracking." />
+    <meta property="twitter:image" content="https://bookrec-rbqv.onrender.com/images/hero-books.webp" />
+
+    <!-- preconnects for CDNs and fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
+    <!-- swap local Bootstrap for ultra-fast CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+
+    <!-- fonts & external CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
     <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["css/folio-theme.css"]" />
     <link rel="stylesheet" href="@Assets["BookRec.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <HeadOutlet />
 </head>
