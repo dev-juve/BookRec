@@ -42,8 +42,8 @@
                        @onkeyup="HandleKeyPress" />
             </div>
 
-            <!-- mobile toggler (hamburger menu) -->
-            <button class="navbar-toggler border-0 p-1 ms-1" type="button" @onclick="ToggleNavMenu" aria-expanded="@(!collapseNavMenu)">
+            <!-- mobile toggler (hamburger menu) - FIXED WITH ARIA-LABEL -->
+            <button class="navbar-toggler border-0 p-1 ms-1" type="button" @onclick="ToggleNavMenu" aria-expanded="@(!collapseNavMenu)" aria-label="Toggle navigation menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
